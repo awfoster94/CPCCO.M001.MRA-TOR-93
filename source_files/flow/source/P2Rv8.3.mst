@@ -1,0 +1,29 @@
+         3         1         1         0         1         1         2         0         1         2         3         0         1         1         3 INOMINSAT,ICVSAT,IWLQRD,ISIDUN,IFRCCNVG,IKRWGT,INRSTRG,ITSLAG
+         0     1.0D-07(10E12.4)                    0                                        MIN SAT THICKNESS
+         0     1.000(10E12.4)                   -1                                        G Variable
+         0     1.000(10E12.4)                   -1                                        F Variable
+   1.0D-07   1.0D-07                0.10    1.2E00
+
+
+
+INOMINSAT = 3  RELATIVE CONDUCTIVITY WILL BE APPLIED
+ICVSAT  = 1    SATURATED CONDUCTIVITY WILL BE APPLIED
+IWLQRD = 1     PUMPING RATE WILL BE REDUCED FOR DRY CELLS
+ISIDUN = 0     Not used
+IFRCCNVG = 0   DEFAULT CONVERGENCE OPTION AS SET IN SOLVER
+IKRWGT = 1     UPSTREAM WEIGHTING WILL BE APPLIED ON Kr
+INRSTRG  = 2   NEWTON-RAPHSON ON STORAGE - OPTION 2
+ITSLAG   = 0   ORIGINAL CONDUCTANCE FORMULATION
+NOVFC  = 1     NO VERTICAL FLOW CORRECTION
+IKRNR  = 2     PARABOLIC SMOOTHING OPTION 2, SLOPE=1
+UNDERRELAXATION=3 UNDERRELAXATION AND BACKTRACKING
+IBOTDAMP = 0
+IRCHADJ  = 0
+ICHDOPT  = 2    FULL N-R FOR CONDUCTANCE
+MIN SATURATED THICKNESS = 1.0D-07
+
+RESCHG = 1.2
+
+
+
+

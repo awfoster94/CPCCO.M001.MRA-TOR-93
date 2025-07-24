@@ -1,0 +1,35 @@
+#   MODFLOW2000 Layer Property Flow (LPF) Package
+        50  -1.000000e+030         0
+  1  3  3  3  3  3  3
+  0  0  0  0  0  0  0
+  1.000000e+000  1.000000e+000  1.000000e+000  1.000000e+000  1.000000e+000  1.000000e+000  1.000000e+000
+ 0 0 0 0 0 0 0
+ 0 0 0 0 0 0 0
+OPEN/CLOSE kh1.ref     1.0000000E+00 (7E14.6)                       -1    Hydraulic Conductivity  1
+OPEN/CLOSE kh1.ref     1.0000000E-01 (7E14.6)                       -1    Vertical Hydraulic Conductivity  1
+OPEN/CLOSE ss.ref      1.0000000E+00 (7E14.6)                       -1    Specific Storage 1
+OPEN/CLOSE sy1.ref     1.0000000E+00 (7E14.6)                       -1    Specific Yield  1
+OPEN/CLOSE kh2.ref     1.0000000E+00 (7E14.6)                       -1    Hydraulic Conductivity  2
+OPEN/CLOSE kh2.ref     1.0000000E-01 (7E14.6)                       -1    Vertical Hydraulic Conductivity  2
+OPEN/CLOSE ss.ref      1.0000000E+00 (7E14.6)                       -1    Specific Storage 2
+OPEN/CLOSE sy2.ref     1.0000000E+00 (7E14.6)                       -1    Specific Yield  2
+OPEN/CLOSE khUpdate3.ref     1.0000000E+00 (7E14.6)                       -1    Hydraulic Conductivity  3
+OPEN/CLOSE khUpdate3.ref     1.0000000E-01 (7E14.6)                       -1    Vertical Hydraulic Conductivity  3
+OPEN/CLOSE ss.ref      1.0000000E+00 (7E14.6)                       -1    Specific Storage 3
+OPEN/CLOSE sy3.ref     1.0000000E+00 (7E14.6)                       -1    Specific Yield  3
+OPEN/CLOSE khUpdate4.ref     1.0000000E+00 (7E14.6)                       -1    Hydraulic Conductivity  4
+OPEN/CLOSE khUpdate4.ref     1.0000000E-01 (7E14.6)                       -1    Vertical Hydraulic Conductivity  4
+OPEN/CLOSE ss.ref      1.0000000E+00 (7E14.6)                       -1    Specific Storage 4
+OPEN/CLOSE sy4.ref     1.0000000E+00 (7E14.6)                       -1    Specific Yield 4
+OPEN/CLOSE khUpdate5.ref     1.0000000E+00 (7E14.6)                       -1    Hydraulic Conductivity  5
+OPEN/CLOSE khUpdate5.ref     1.0000000E-01 (7E14.6)                       -1    Vertical Hydraulic Conductivity  5
+OPEN/CLOSE ss.ref      1.0000000E+00 (7E14.6)                       -1    Specific Storage 5
+OPEN/CLOSE sy5.ref     1.0000000E+00 (7E14.6)                       -1    Specific Yield  5
+OPEN/CLOSE kh6.ref     1.0000000E+00 (7E14.6)                       -1    Hydraulic Conductivity  6
+OPEN/CLOSE kh6.ref     1.0000000E-01 (7E14.6)                       -1    Vertical Hydraulic Conductivity  6
+OPEN/CLOSE ss.ref      1.0000000E+00 (7E14.6)                       -1    Specific Storage 6
+OPEN/CLOSE sy6.ref     1.0000000E+00 (7E14.6)                       -1    Specific Yield  6
+OPEN/CLOSE kh7.ref     1.0000000E+00 (7E14.6)                       -1    Hydraulic Conductivity  7
+OPEN/CLOSE kh7.ref     1.0000000E-01 (7E14.6)                       -1    Vertical Hydraulic Conductivity  7
+OPEN/CLOSE ss.ref      1.0000000E+00 (7E14.6)                       -1    Specific Storage 7
+OPEN/CLOSE sy7.ref     1.0000000E+00 (7E14.6)                       -1    Specific Yield  7
