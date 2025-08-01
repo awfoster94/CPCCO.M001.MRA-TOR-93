@@ -8,7 +8,7 @@ Created July 2025
 ##############################################################################
 ##############################################################################
 
-########################## ECF-200E-25-0027 ################################
+########################## ECF-200ZP1-22-0098 ################################
 ############################ python workflow #################################
 
 #### This workflow is developed to support particle tracking simulations ####
@@ -19,8 +19,6 @@ Created July 2025
 ##############################################################################
 
 # note make sure to create the virtual environments from the .yml files
-# note you will need to clone and use an arcpy virtual environment for ARCGIS PRO
-# the arcpy virtual environment processing will need the advanced 3D spatial analyst licensing activated for ARCGIS PRO
 
 # import necessary python packages and libraries
 import os
@@ -46,10 +44,7 @@ import time
 import json
 
 # define some global variables
-# define ecf
-ecf_name = 'ECF-200E-25-0027_R0'
-# define output folder name
-ecf_folder_name = 'RCRA.Quarterly.2025'
+ecf_name = 'ECF-200ZP1-22-0098'
 
 # collect the local working directory
 cwd = os.getcwd()
@@ -77,7 +72,7 @@ fig_d = os.path.join(cwd, 'figs')
 # global boolen to turn the workflow on
 flag_new_ecf = False
 
-# booleans to turn on each calc function incrementally, perform sequentially. 
+# booleans to turn on each calc function incrementally that are called in main(), perform sequentially. 
 flag_create_ptrk_folder = False
 flag_copy_transport_props = False
 flag_run_modflow = False
@@ -869,7 +864,7 @@ def main():
 
         ################################################################################################################
         ################################################################################################################
-        ################################## ECF-200E-25-0027 Calculations Starting Here ###############################
+        ################################## ECF-200ZP1-22-0098 Calculations Starting Here ###############################
         ################################################################################################################
         ################################################################################################################
         print('starting ecf calculations...')
