@@ -1,0 +1,15 @@
+nx 125
+ny 115 
+nz 26
+dx 50
+dy 50
+dz 5.0
+ox 565325  
+oy 133025  
+oz 10
+
+
+
+125    565325.0    50.                 -nx,xmn,xsiz
+115    133025.0    50.                 -ny,ymn,ysiz
+26    10    5.0                        -nz,zmn,zsiz

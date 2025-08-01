@@ -1,0 +1,10 @@
+        61     1.000(10E14.6)                   -1     !AL - 1 array for each layer
+        62     1.000(10E14.6)                   -1     !AL - 1 array for each layer		 
+        63     1.000(10E14.6)                   -1     !AL - 1 array for each layer
+        64     1.000(10E14.6)                   -1     !AL - 1 array for each layer	 
+        65     1.000(10E14.6)                   -1     !AL - 1 array for each layer
+        66     1.000(10E14.6)                   -1     !AL - 1 array for each layer		 
+        67     1.000(10E14.6)                   -1     !AL - 1 array for each layer
+         0       0.2                                  !TRPT - 1D array representing all model layers
+         0       0.0                                  !TRPV - 1D array representing all model layers
+         0       0.0                                  !DMCOEF - 1D array representing all model layers

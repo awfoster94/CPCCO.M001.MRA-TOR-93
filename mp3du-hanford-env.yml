@@ -1,0 +1,15 @@
+name: mp3du-hanford-env
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.8
+  - numpy
+  - pyshp
+  - matplotlib
+  - pandas
+  - geopandas
+  - ipykernel
+  #- libgfortran5
+  #- libblas=*=*mkl  # Pin to MKL for better threading compatibility
+  
