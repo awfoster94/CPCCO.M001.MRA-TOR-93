@@ -13,7 +13,7 @@ by: awfoster94
 
 2. To calculate Smw, Sew, and Sp-cs scores, install the following virtual python environment
    
-   a. open anaconda prompt\
+   a. open miniforge or mamba prompt\
    b. cd into the cloned directory with the .yml file & workflow.py\
    c. run command: conda env create -f mp3du-hanford-env.yml -n mp3du-hanford-env
 
