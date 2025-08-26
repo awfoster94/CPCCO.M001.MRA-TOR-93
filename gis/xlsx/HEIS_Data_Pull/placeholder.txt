@@ -1,0 +1,11 @@
+placeholder.txt
+
+4 files should be located here (some are too large to push to github):
+
+1. Manual_GW_CY2025_GWSR_TO93.txt (15.3K KB)
+
+2. qryAWLN_SSPA_TO93.txt (241K KB)
+
+3. qryAWLN2021_Present_TO93.txt (148K KB)
+
+4. qryMANHEIS_TO93.txt (12.8K KB)
