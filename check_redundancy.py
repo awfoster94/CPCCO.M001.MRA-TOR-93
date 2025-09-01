@@ -28,6 +28,25 @@ def plot_variogram(data_subset, var_params, wdir):
     analyte, transform, stype, ran, hor, va, sill, nugget, var, len3 = var_params.iloc[0]
 
     print("Plotting Variogram for ", analyte)
+    required_cols = ['XCOORDS', 'YCOORDS', 'ELE_m', 'VAL', 'NAME']
+    if not all(col in data_subset.columns for col in required_cols):
+        # logger.error(f"Missing columns: {required_cols}")
+        data_subset.to_csv(f"{wdir}/invalid_data_subset.csv", index=False)
+        return None
+    if data_subset[required_cols].isnull().any().any():
+        # logger.error(f"NaN/None values in data for {analyte}")
+        data_subset.to_csv(f"{wdir}/invalid_data_subset.csv", index=False)
+        return None
+    if len(data_subset) < 3:
+        # logger.error(f"Insufficient data points ({len(data_subset)}) for kriging")
+        data_subset.to_csv(f"{wdir}/insufficient_data_subset.csv", index=False)
+        return None
+
+    coords = data_subset[['XCOORDS', 'YCOORDS', 'ELE_m']].values
+    unique_coords, indices = np.unique(coords, axis=0, return_index=True)
+    if len(unique_coords) < len(coords):
+        # logger.warning(f"Found {len(coords) - len(unique_coords)} duplicate coordinates")
+        data_subset = data_subset.iloc[indices].copy()
 
     x = data_subset['XCOORDS'].values
     y = data_subset['YCOORDS'].values
@@ -37,10 +56,21 @@ def plot_variogram(data_subset, var_params, wdir):
 
     if transform == 'log':
         log_values = np.log10(values)
+        if np.any(np.isnan(log_values)) or np.any(np.isinf(log_values)):
+            invalid_data = data_subset[np.isnan(log_values) | np.isinf(log_values)].copy()
+            invalid_data['log_values'] = log_values[np.isnan(log_values) | np.isinf(log_values)]
+            return None
         bin_center, gamma = gs.vario_estimate((x, y, z), log_values)
     else:
         q_values = np.log10(values)
+        if analyte not in ['Iodine-129', 'Tritium']:
+            if np.any(np.isnan(log_values)) or np.any(np.isinf(log_values)):
+                invalid_data = data_subset[np.isnan(log_values) | np.isinf(log_values)].copy()
+                invalid_data['log_values'] = log_values[np.isnan(log_values) | np.isinf(log_values)]
+                return None
         bin_center, gamma = gs.vario_estimate((x, y, z), q_values)
+
+    
 
     if stype == 'exponential':
         model = gs.Exponential(dim=3, var=var, len_scale=[ran, ran, len3], nugget=nugget)
@@ -74,12 +104,13 @@ outputs = "C:/Project_work/Hanford/Data_gap/01_plumemapping/outputs/"
 
 for c in cocs:
     wdir = os.path.join(outputs, c)
-    if c not in special_ls:
-        data = pd.read_csv(os.path.join(wdir, "csv/ft6_dataset4kriging_add_ij_hsu_with_finalassignments.csv"))
-    elif c == special_ls[0]:
-        data = pd.read_csv(os.path.join(wdir,"csv/ft6_dataset4kriging_add_ij_hsu_with_finalassignments_withHexCr.csv"))
-    else:
-        data = pd.read_csv(os.path.join(wdir,"csv/ft6_dataset4kriging_add_ij_hsu_with_finalassignments_MODIFIED_FloorI129.csv"))
+    data = pd.read_csv(os.path.join(wdir, "final_dataset_for_plume_mapping.csv"))
+    # if c not in special_ls:
+    #     data = pd.read_csv(os.path.join(wdir, "csv/final_dataset_for_plume_mapping.csv"))
+    # elif c == special_ls[0]:
+    #     data = pd.read_csv(os.path.join(wdir,"csv/ft6_dataset4kriging_add_ij_hsu_with_finalassignments_withHexCr.csv"))
+    # else:
+    #     data = pd.read_csv(os.path.join(wdir,"csv/ft6_dataset4kriging_add_ij_hsu_with_finalassignments_MODIFIED_FloorI129.csv"))
     
     var_params = var_csv[var_csv['analyte']==c]
 
