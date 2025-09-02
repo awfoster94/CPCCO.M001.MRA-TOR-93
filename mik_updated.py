@@ -20,15 +20,17 @@ from skgstat import models as skg_models
 # ──────────────────────────────────────────────────────────────────────────────
 # Paths
 # ──────────────────────────────────────────────────────────────────────────────
-data_path = os.path.join("..", "data")
+data_path = os.path.join("data")
 gis_path = os.path.join("gis")
 aoi_path = os.path.join(gis_path, "shp", "OUs", "zp1_up1_outline.shp")
 ou_path = os.path.join(gis_path, "shp", "OUs", "ZP1_UP1.shp")
-rcl_path = os.path.join("data_gap_RCs.csv")
+rcl_path = os.path.join(data_path, "data_gap_RCs.csv")
 grid_path = os.path.join(gis_path, "shp", "model_grid", "grid_274.shp")
 rds_path = os.path.join(gis_path, "shp", "basemaps", "trvehrcl_buffer15m.shp")
 processed_root = os.path.join(data_path, "processed_data") 
 maps_root_default = os.path.join(processed_root, "maps")
+scores_only_csv = os.path.join("scores_combined", "scores_combined_only.csv")
+scores_detailed_csv = os.path.join("scores_combined", "scores_combined_detailed.csv")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Functions
@@ -1602,7 +1604,212 @@ def plot_rcl_scores(
     
     plt.show()
 
+def _sample_raster_at_rcl(res, rcl_gdf, grid_path):
+    """
+    From a res dict (with xgrid, ygrid, mean_raster, var_raster),
+    compute cov = sqrt(var)/mean, build percentile-based scores (30|50|70|90),
+    and sample both cov and cov_score at RCL node centroids (by row/col via grid_274.shp).
+    Returns a DataFrame with columns: row, col, mik_cov, mik_cov_score.
+    """
+    import numpy as np
+    import pandas as pd
+    import geopandas as gpd
 
+    # ---- 1) Build COV raster (dimensionless) ----
+    mean = np.asarray(res["mean_raster"], float)
+    var  = np.asarray(res["var_raster"],  float)
+    mean_safe = np.clip(mean, 1e-6, None)
+    cov = np.sqrt(np.maximum(var, 0.0)) / mean_safe
+    cov[~np.isfinite(mean)] = np.nan
+
+    # Percentile cut points from the whole raster distribution
+    finite = cov[np.isfinite(cov)]
+    if finite.size:
+        q30, q50, q70, q90 = np.nanpercentile(finite, [30, 50, 70, 90])
+        bins = np.r_[-np.inf, [q30, q50, q70, q90], np.inf]
+    else:
+        bins = np.array([-np.inf, np.inf])  # degenerate
+
+    # ---- 2) Map RCL rows/cols to grid centroids for sampling ----
+    grid_gdf = gpd.read_file(grid_path)
+    grid_gdf["row"] = pd.to_numeric(grid_gdf["row"], errors="coerce").astype("Int64")
+    if "column" in grid_gdf.columns:
+        grid_gdf["col"] = pd.to_numeric(grid_gdf["column"], errors="coerce").astype("Int64")
+    else:
+        grid_gdf["col"] = pd.to_numeric(grid_gdf["col"], errors="coerce").astype("Int64")
+
+    r = rcl_gdf.copy()
+    r["row"] = pd.to_numeric(r["row"], errors="coerce").astype("Int64")
+    r["col"] = pd.to_numeric(r["col"], errors="coerce").astype("Int64")
+
+    # Merge brings in two geometry columns; prefer the GRID geometry (usually polygons)
+    rg = r.merge(grid_gdf[["row","col","geometry"]], on=["row","col"], how="left", suffixes=("_rcl", "_grid"))
+
+    # Pick an active geometry column in priority order: grid → rcl → geometry
+    geom_col = None
+    for cand in ("geometry_grid", "geometry_rcl", "geometry"):
+        if cand in rg.columns and hasattr(rg[cand], "geom_type"):
+            geom_col = cand
+            break
+    if geom_col is None:
+        raise ValueError("No geometry column found after merge; check grid/rcl inputs.")
+
+    rg = gpd.GeoDataFrame(rg, geometry=geom_col, crs=getattr(grid_gdf, "crs", None) or getattr(rcl_gdf, "crs", None))
+
+    # Use centroids for polygons; use coordinates directly for points
+    geom_series = rg.geometry
+    if not geom_series.geom_type.isin(["Point"]).all():
+        pts = geom_series.centroid
+    else:
+        pts = geom_series
+
+    x = pts.x.to_numpy()
+    y = pts.y.to_numpy()
+
+    # ---- 3) Convert to raster indices using xgrid,ygrid ----
+    xgrid = np.asarray(res["xgrid"], float)
+    ygrid = np.asarray(res["ygrid"], float)
+    dx = xgrid[1] - xgrid[0]
+    dy = ygrid[1] - ygrid[0]
+
+    xi = np.clip(np.rint((x - xgrid[0]) / dx).astype(int), 0, cov.shape[1]-1)
+    yi = np.clip(np.rint((y - ygrid[0]) / dy).astype(int), 0, cov.shape[0]-1)
+
+    vals = cov[yi, xi]
+    idx = np.digitize(vals, bins=bins, right=False) - 1
+    # Clamp to 0..4 if we used 5 bins; otherwise safe clamp
+    max_class = 4 if bins.size == 6 else max(0, bins.size - 3)
+    idx = np.clip(idx, 0, max_class).astype(float)
+
+    out = pd.DataFrame({
+        "row": rg["row"].to_numpy(),
+        "col": rg["col"].to_numpy(),
+        "mik_cov": vals,
+        "mik_cov_score": idx
+    })
+    # Ensure NaNs propagate if any lookup failed
+    bad = ~np.isfinite(vals)
+    if bad.any():
+        out.loc[bad, ["mik_cov","mik_cov_score"]] = np.nan
+    return out
+
+
+
+def _extract_rcl_cv_block(rcl_gdf, prefix):
+    """
+    From an rcl_* GeoDataFrame produced by score_rcl_nodes, pull:
+      - S_CV  → <prefix>_mik_cv_score
+      - MIK_CV → <prefix>_mik_cv   (for detailed file)
+    Returns a DataFrame with row,col and those two columns.
+    """
+    df = rcl_gdf.copy()
+    df["row"] = pd.to_numeric(df["row"], errors="coerce").astype("Int64")
+    df["col"] = pd.to_numeric(df["col"], errors="coerce").astype("Int64")
+    out = df[["row","col","S_CV","MIK_CV"]].copy()
+    out.rename(columns={
+        "S_CV":  f"{prefix}_mik_cv_score",
+        "MIK_CV": f"{prefix}_mik_cv"
+    }, inplace=True)
+    return out
+
+
+def _prefix(constituent, assignment):
+    return f"{constituent.lower()}_{assignment.lower().replace('/','_')}"
+
+
+def add_scores_to_csvs(
+    scores_only_csv,
+    scores_detailed_csv,
+    grid_path,
+    bundles
+):
+    """
+    Merge new columns into two CSVs.
+
+    Parameters
+    ----------
+    scores_only_csv : str
+        Path to 'scores_combined_only.csv'
+    scores_detailed_csv : str
+        Path to 'scores_combined_detailed.csv'
+    grid_path : str
+        Path to grid_274.shp (used to map row/col to centroids for COV sampling)
+    bundles : list of dict
+        Each dict describes one constituent/assignment bundle:
+        {
+          "constituent": "CTET" | "HexCr" | "Tc99",
+          "assignment":  "UU/MU" | "LU/CR",
+          "res": res_dict_from_run_mik_for,
+          "rcl": rcl_gdf_from_score_rcl_nodes
+        }
+
+    Behavior
+    --------
+    - Adds columns per bundle:
+        <prefix>_mik_cv_score          (→ both CSVs)
+        <prefix>_mik_cov_score         (→ both CSVs)
+      And to the *detailed* CSV also:
+        <prefix>_mik_cv
+        <prefix>_mik_cov
+      where prefix = {ctet,hexcr,tc99}_{uumu|lucr}.
+    - Overwrites existing columns of the same name.
+    - Joins on ['row','col'].
+    """
+    # load base CSVs
+    base_only     = pd.read_csv(scores_only_csv)
+    base_detailed = pd.read_csv(scores_detailed_csv)
+
+    # Ensure join keys are numeric/int-like
+    for df in (base_only, base_detailed):
+        df["row"] = pd.to_numeric(df["row"], errors="coerce").astype("Int64")
+        df["col"] = pd.to_numeric(df["col"], errors="coerce").astype("Int64")
+
+    # build a merged block across bundles for each target CSV
+    merge_block_only     = None
+    merge_block_detailed = None
+
+    for b in bundles:
+        constituent = b["constituent"]
+        assignment  = b["assignment"]
+        res         = b["res"]
+        rcl         = b["rcl"]
+
+        pref = _prefix(constituent, assignment)  # e.g., "ctet_uumu"
+
+        # 1) S_CV (score_rcl_nodes) + MIK_CV (value at RCL) → from rcl_gdf
+        rcl_block = _extract_rcl_cv_block(rcl, pref)  # has row,col,pref_mik_cv_score,pref_mik_cv
+
+        # 2) MIK-COV raster sampling & scoring
+        cov_block = _sample_raster_at_rcl(res, rcl, grid_path)  # row,col,mik_cov,mik_cov_score
+        cov_block.rename(columns={
+            "mik_cov":       f"{pref}_mik_cov",
+            "mik_cov_score": f"{pref}_mik_cov_score"
+        }, inplace=True)
+
+        # merge the two side-by-side (on row,col)
+        bundle_block = rcl_block.merge(cov_block, on=["row","col"], how="outer")
+
+        # For the *only* CSV we keep only the *_score columns
+        only_cols = ["row","col", f"{pref}_mik_cv_score", f"{pref}_mik_cov_score"]
+        block_only = bundle_block[only_cols].copy()
+
+        # For the *detailed* CSV we keep scores + raw values
+        detailed_cols = only_cols + [f"{pref}_mik_cv", f"{pref}_mik_cov"]
+        block_detailed = bundle_block[detailed_cols].copy()
+
+        # accumulate
+        merge_block_only = block_only if merge_block_only is None else merge_block_only.merge(block_only, on=["row","col"], how="outer")
+        merge_block_detailed = block_detailed if merge_block_detailed is None else merge_block_detailed.merge(block_detailed, on=["row","col"], how="outer")
+
+    # left-join into the base CSVs and overwrite existing columns if present
+    out_only = base_only.merge(merge_block_only, on=["row","col"], how="left", suffixes=("",""))
+    out_detailed = base_detailed.merge(merge_block_detailed, on=["row","col"], how="left", suffixes=("",""))
+
+    # save back (overwrite)
+    out_only.to_csv(scores_only_csv, index=False)
+    out_detailed.to_csv(scores_detailed_csv, index=False)
+
+    print(f"Updated:\n  {scores_only_csv}\n  {scores_detailed_csv}")
     
 # ──────────────────────────────────────────────────────────────────────────────
 # CTET UU/MU
@@ -2046,3 +2253,24 @@ plot_mik_cov_score(tc99_uumu, title_prefix="Tc99 UU/MU —")
 
 plot_mik_cov(tc99_lucr, title_prefix="Tc99 LU/CR —")
 plot_mik_cov_score(tc99_lucr, title_prefix="Tc99 LU/CR —")
+
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Add Scoring to CSVs
+# ──────────────────────────────────────────────────────────────────────────────
+
+bundles = [
+    {"constituent": "CTET", "assignment": "UU/MU", "res": ctet_uumu, "rcl": rcl_ctet_uumu},
+    {"constituent": "CTET", "assignment": "LU/CR", "res": ctet_lucr, "rcl": rcl_ctet_lucr},
+    {"constituent": "HexCr","assignment": "UU/MU", "res": hexcr_uumu, "rcl": rcl_hexcr_uumu},
+    {"constituent": "HexCr","assignment": "LU/CR", "res": hexcr_lucr, "rcl": rcl_hexcr_lucr},
+    {"constituent": "Tc99", "assignment": "UU/MU", "res": tc99_uumu, "rcl": rcl_tc99_uumu},
+    {"constituent": "Tc99", "assignment": "LU/CR", "res": tc99_lucr, "rcl": rcl_tc99_lucr},
+]
+
+add_scores_to_csvs(
+    scores_only_csv=scores_only_csv,
+    scores_detailed_csv=scores_detailed_csv,
+    grid_path=grid_path,
+    bundles=bundles
+)
