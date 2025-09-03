@@ -38,18 +38,19 @@ MODEL_START_DATE  = "2015-01-01"
 # =============================================================================
 # Paths
 # =============================================================================
-FLOW_ROOT   = os.path.join("FnT_Models_from_TO-067", "Flow")
-TRANS_ROOT  = os.path.join("FnT_Models_from_TO-067", "Transport")
+FLOW_ROOT   = os.path.join("source_files", "flow", "source")
+TRANS_ROOT  = os.path.join("source_files", "transport")
 
-rank_csv    = "ranks.csv"
-cleanup_csv = "final_cleanup_levels.csv"
-rcl_csv     = os.path.join("data_gap", "data_gap_RCs.csv")
+rank_csv    = os.path.join("data", "conc_ranking", "ranks.csv")
+cleanup_csv = os.path.join("data", "conc_ranking", "final_cleanup_levels.csv")
+rcl_csv     = os.path.join("data", "data_gap_RCs.csv")
 
-basemap     = os.path.join("..", "02_data", "GIS", "shp")
+basemap     = os.path.join("gis", "shp")
 ou_path     = os.path.join(basemap, "OUs", "ZP1_UP1.shp")
-grid_path   = os.path.join(basemap, "grid_274", "grid_274.shp")
+grid_path   = os.path.join(basemap, "model_grid", "grid_274.shp")
+rds_path    = os.path.join("gis", "shp", "basemaps", "trvehrcl_buffer15m.shp") 
 
-out_root    = "outputs_coc_CLE_QC"   # results root
+out_root    = os.path.join("data", "outputs_coc_CLE_QC")   # results root
 
 # =============================================================================
 # COC configuration
@@ -106,6 +107,129 @@ GRID_LW         = 0.25
 # =============================================================================
 # Helpers
 # =============================================================================
+def _get_extent_from_gdf(gdf):
+    xmin, ymin, xmax, ymax = gdf.total_bounds
+    return [xmin, xmax, ymin, ymax]  # for imshow: [L, R, B, T]
+
+def _cmap_with_alpha(cmap, alpha=0.45):
+    """Return a copy of `cmap` with constant RGBA alpha applied to all colors."""
+    import matplotlib.colors as mcolors
+    if isinstance(cmap, str):
+        cmap = plt.get_cmap(cmap)
+    cols = cmap(np.linspace(0, 1, cmap.N))
+    cols[:, 3] = alpha
+    return mcolors.ListedColormap(cols, name=f"{cmap.name}_a{int(alpha*100)}")
+
+def _cmap_with_alpha(cmap, alpha=0.45):
+    """Return a copy of `cmap` with constant RGBA alpha applied to all colors."""
+    import matplotlib.colors as mcolors
+    if isinstance(cmap, str):
+        cmap = plt.get_cmap(cmap)
+    cols = cmap(np.linspace(0, 1, cmap.N))
+    cols[:, 3] = alpha
+    return mcolors.ListedColormap(cols, name=f"{cmap.name}_a{int(alpha*100)}")
+
+def plot_cle_map_pro(
+    grid_arr, *, title, fname, outdir,
+    ou_gdf, roads_gdf, grid_gdf, mf,
+    discrete=True, alpha=0.45, zoom_extent=None,
+    coc_label="CLE Score (Ringold E)", show_grid=False
+):
+    """
+    CLE map with roads UNDER the raster. The raster colors have built-in alpha,
+    so roads remain visible through it. Colorbar + legend boxes match the same
+    transparency for a consistent look.
+    """
+    # --- colormap / norm / ticks ---
+    if discrete:
+        base_cmap   = CLE_CLASS_CMAP
+        cmap        = _cmap_with_alpha(base_cmap, alpha)  # <-- transparency in the colors
+        norm        = CLE_CLASS_NORM
+        cb_ticks    = CLE_CLASS_TICKS
+        cb_ticklabs = CLE_CLASS_LABELS
+        vmin = vmax = None
+    else:
+        base_cmap   = plt.get_cmap(CMAP_CLE_CONT)
+        cmap        = _cmap_with_alpha(base_cmap, alpha)
+        norm        = None
+        cb_ticks = cb_ticklabs = None
+        vmin, vmax = VMIN_CLE, VMAX_CLE
+
+    # mask to let basemap show anywhere there is NaN
+    Z = np.asarray(grid_arr, float)
+    Z = np.ma.masked_invalid(Z)
+
+    fig, ax = plt.subplots(figsize=(9.5, 6.5))
+    fig.subplots_adjust(left=0.12, right=0.96, bottom=0.10, top=0.92)
+
+    # --- basemap FIRST (underlay) ---
+    if roads_gdf is not None and not roads_gdf.empty:
+        rd = roads_gdf if roads_gdf.crs == grid_gdf.crs else roads_gdf.to_crs(grid_gdf.crs)
+        # darker & slightly thicker so it reads through the translucent raster
+        rd.plot(ax=ax, color="0.25", linewidth=1.1, zorder=1)
+
+    # --- raster on TOP (translucent via colormap) ---
+    pmv  = PlotMapView(model=mf, ax=ax)
+    quad = pmv.plot_array(Z, cmap=cmap, norm=norm, vmin=vmin, vmax=vmax, zorder=2)
+    # do NOT call quad.set_alpha(); we already encoded alpha in `cmap`
+
+    if show_grid:
+        pmv.plot_grid(lw=0.15, color="0.8", zorder=2.05)
+
+    # OU overlay (topmost)
+    if ou_gdf is not None and not ou_gdf.empty:
+        og = ou_gdf if ou_gdf.crs == grid_gdf.crs else ou_gdf.to_crs(grid_gdf.crs)
+        og.boundary.plot(ax=ax, edgecolor="black", linewidth=1.2, linestyle="--", zorder=3)
+        og.boundary.plot(ax=ax, edgecolor="0.55",  linewidth=1.0, linestyle=":",  zorder=3)
+
+    # zoom or full bounds
+    if zoom_extent is not None:
+        xmin, xmax, ymin, ymax = zoom_extent
+    else:
+        xmin, ymin, xmax, ymax = grid_gdf.total_bounds
+    ax.set_xlim(xmin, xmax); ax.set_ylim(ymin, ymax)
+    ax.set_aspect("equal")
+
+    # simple scalebar
+    def _scale(ax, pad_frac=0.05, h_frac=0.012):
+        (x0,x1) = ax.get_xlim(); (y0,y1) = ax.get_ylim()
+        W, H = x1-x0, y1-y0
+        target = W*0.25
+        choices = [100,200,500,1000,2000,5000,10000]
+        L = min(choices, key=lambda c: abs(c-target))
+        bx, by = x0+W*pad_frac, y0+H*pad_frac
+        bh = H*h_frac
+        ax.add_patch(plt.Rectangle((bx,by), L,   bh, fc="k", ec="k", zorder=20))
+        ax.add_patch(plt.Rectangle((bx,by), L/2, bh, fc="w", ec="k", zorder=21))
+        ax.text(bx+L/2, by+bh*2.0, f"{int(L)}", ha="center", va="bottom", fontsize=9, zorder=22)
+    _scale(ax)
+
+    # clean frame
+    ax.set_xticks([]); ax.set_yticks([]); [s.set_visible(False) for s in ax.spines.values()]
+
+    # colorbar + legend boxes use the same transparency
+    cb = fig.colorbar(quad, ax=ax, fraction=0.030, pad=0.02)
+    cb.set_label(coc_label)
+    if cb_ticks is not None:
+        cb.set_ticks(cb_ticks); cb.set_ticklabels(cb_ticklabs)
+    cb.ax.patch.set_alpha(alpha)
+    cb.outline.set_alpha(alpha)
+
+    handles = [
+        plt.Line2D([0],[0], color="0.25", lw=1.3, label="Roads"),
+        plt.Line2D([0],[0], color="black", lw=1.5, ls=(0,(5,5)), label="Groundwater Operable Unit"),
+    ]
+    leg = ax.legend(handles=handles, loc="upper left", frameon=True, fontsize=9)
+    leg.get_frame().set_alpha(alpha)
+    leg.get_frame().set_edgecolor((0, 0, 0, alpha))
+
+    fig.text(0.5, 0.04, title, ha="center", va="bottom", fontsize=12)
+    os.makedirs(outdir, exist_ok=True)
+    fig.savefig(os.path.join(outdir, fname), dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
+
 def get_cleanup_threshold(cleanup_df, pattern: str) -> float:
     pat = pattern.lower()
     mask = cleanup_df["COC"].str.lower().str.contains(pat, na=False)
@@ -278,19 +402,32 @@ def process_coc(coc_key, cfg, mf, ranks_df, cleanup_df, rcl_df, ou_gdf, grid_gdf
     # --- write CSV(s) ---
     outdir = os.path.join(out_root, coc_key)
     os.makedirs(outdir, exist_ok=True)
+    # --- build per-cell output table (scores + max conc per subperiod) ---
     out_df = rcl_df[["row", "col"]].copy()
+
+    # raw subperiod scores (already computed above as rawE/rawA)
     for w, rw in ranks_df.iterrows():
-        lab = f"S_R_{rw.start_year}_{rw.end_year}"
-        out_df[lab + "_E"] = rawE[w]
-        out_df[lab + "_A"] = rawA[w]
+        span = f"{rw.start_year}_{rw.end_year}"
+        out_df[f"S_R_{span}_E"] = rawE[w]
+        out_df[f"S_R_{span}_A"] = rawA[w]
+
+        # >>> add per-subperiod **max concentration** (not scores) <<<
+        out_df[f"maxConc_{span}_E"] = maxE[w]  # Ringold E (UUMU) maximum concentration
+        out_df[f"maxConc_{span}_A"] = maxA[w]  # Ringold A (LUCR) maximum concentration
+
         if WRITE_QC_COUNTS:
-            out_df[lab + "_cntE"] = cntE[w]
-            out_df[lab + "_cntA"] = cntA[w]
+            out_df[f"S_R_{span}_cntE"] = cntE[w]
+            out_df[f"S_R_{span}_cntA"] = cntA[w]
         if WRITE_QC_MAXTIMES:
-            out_df[lab + "_maxTOTIM_E(d)"] = maxE_t[w]
-            out_df[lab + "_maxTOTIM_A(d)"] = maxA_t[w]
+            out_df[f"S_R_{span}_maxTOTIM_E(d)"] = maxE_t[w]
+            out_df[f"S_R_{span}_maxTOTIM_A(d)"] = maxA_t[w]
+
+    # CLE averages
     out_df["S_CLE_E"] = S_CLE_E
     out_df["S_CLE_A"] = S_CLE_A
+    # (optional) include scaled if you prefer a strict 0–4 range for maps/combines
+    out_df["S_CLE_E_scaled"] = S_CLE_E_scaled
+    out_df["S_CLE_A_scaled"] = S_CLE_A_scaled
     csv_path = os.path.join(outdir, f"{coc_key}_CLE_results_by_cell.csv")
     out_df.to_csv(csv_path, index=False)
     print(f"  Wrote {csv_path}")
@@ -362,14 +499,145 @@ def process_coc(coc_key, cfg, mf, ranks_df, cleanup_df, rcl_df, ou_gdf, grid_gdf
         fig.savefig(os.path.join(outdir, fname), dpi=300, bbox_inches="tight")
         plt.close(fig)
 
-    plot_cle_map(arrE_plot, f"{coc_label} Ringold E – CLE",        f"{coc_key}_E_CLE_full.png")
-    plot_cle_map(arrA_plot, f"{coc_label} Ringold A – CLE",        f"{coc_key}_A_CLE_full.png")
-    plot_cle_map(arrE_plot, f"{coc_label} Ringold E – CLE (zoom)", f"{coc_key}_E_CLE_zoom.png", extent=zoom_ext)
-    plot_cle_map(arrA_plot, f"{coc_label} Ringold A – CLE (zoom)", f"{coc_key}_A_CLE_zoom.png", extent=zoom_ext)
+    # --- PLOTTING (styled, discrete 0–4 classes, roads + OU) ---
+    # Ensure "class" rasters 0..4 for display:
+    if BINNED_MAPS:
+        dispE = np.full((mg.nrow, mg.ncol), np.nan)
+        dispA = np.full((mg.nrow, mg.ncol), np.nan)
+        dispE[i_idx, j_idx] = bin_cle(S_CLE_E_scaled)  # ints 0..4
+        dispA[i_idx, j_idx] = bin_cle(S_CLE_A_scaled)
+    else:
+        # If not using BINNED_MAPS, still map to 0..4 classes for legend clarity
+        dispE = np.full((mg.nrow, mg.ncol), np.nan)
+        dispA = np.full((mg.nrow, mg.ncol), np.nan)
+        dispE[i_idx, j_idx] = cle_to_class(S_CLE_E_scaled)  # 0..4
+        dispA[i_idx, j_idx] = cle_to_class(S_CLE_A_scaled)
 
+    # base title label
+    label_E = f"{coc_label} CLE Score (Ringold E)"
+    label_A = f"{coc_label} CLE Score (Ringold A)"
+
+    # OUTDIR per COC
+    outdir = os.path.join(out_root, coc_key)
+
+    # Full extent maps
+    # Ensure dispE/dispA are 0..4 class rasters (as you already build)
+    plot_cle_map_pro(
+        dispE, title=f"{coc_label} Ringold E — CLE Score (0–4)",
+        fname=f"{coc_key}_E_CLE_full_pro.png", outdir=outdir,
+        ou_gdf=ou_gdf, roads_gdf=roads_gdf, grid_gdf=grid_gdf, mf=mf,
+        discrete=True, alpha=0.80, zoom_extent=None, coc_label=f"{coc_label} CLE Score (Ringold E)"
+    )
+    plot_cle_map_pro(
+        dispA, title=f"{coc_label} Ringold A — CLE Score (0–4)",
+        fname=f"{coc_key}_A_CLE_full_pro.png", outdir=outdir,
+        ou_gdf=ou_gdf, roads_gdf=roads_gdf, grid_gdf=grid_gdf, mf=mf,
+        discrete=True, alpha=0.80, zoom_extent=None, coc_label=f"{coc_label} CLE Score (Ringold A)"
+    )
+
+    # Zoom versions (use your existing zoom_ext from get_zoom_extent)
+    plot_cle_map_pro(
+        dispE, title=f"{coc_label} Ringold E — CLE Score (zoom)",
+        fname=f"{coc_key}_E_CLE_zoom_pro.png", outdir=outdir,
+        ou_gdf=ou_gdf, roads_gdf=roads_gdf, grid_gdf=grid_gdf, mf=mf,
+        discrete=True, alpha=0.80, zoom_extent=zoom_ext, coc_label=f"{coc_label} CLE Score (Ringold E)"
+    )
+    plot_cle_map_pro(
+        dispA, title=f"{coc_label} Ringold A — CLE Score (zoom)",
+        fname=f"{coc_key}_A_CLE_zoom_pro.png", outdir=outdir,
+        ou_gdf=ou_gdf, roads_gdf=roads_gdf, grid_gdf=grid_gdf, mf=mf,
+        discrete=True, alpha=0.80, zoom_extent=zoom_ext, coc_label=f"{coc_label} CLE Score (Ringold A)"
+    )
     print(f"  Plots written to {outdir}")
+    
+    # update combined CSVs (per-cell join)
+    update_combined_outputs(coc_key, out_df, ranks_df)
+    
     return out_df
 
+# =============================================================================
+# Combined output writers (per-cell join)
+# =============================================================================
+def update_combined_outputs(coc_key, out_df, ranks_df, combined_dir="scores_combined"):
+    """
+    Update (or create) the requested columns in:
+      - scores_combined/scores_combined_detailed.csv
+      - scores_combined/scores_combined_only.csv
+
+    Overwrites existing columns in-place (no _x/_y suffixes), joined by (row, col).
+    Requires the combined CSVs to already contain: FID, Shape, row, col, Easting, Northing.
+    Expects out_df to contain:
+      maxConc_<span>_E / maxConc_<span>_A, S_CLE_E, S_CLE_A (and/or *_scaled).
+    """
+    os.makedirs(combined_dir, exist_ok=True)
+    detailed_path = os.path.join(combined_dir, "scores_combined_detailed.csv")
+    only_path     = os.path.join(combined_dir, "scores_combined_only.csv")
+
+    # Map to requested short prefixes
+    pref = {"HexChromium": "hexcr", "TC99": "tc99", "CTET_600y": "ctet"}.get(coc_key, coc_key.lower())
+
+    # --- load combined CSVs
+    if not (os.path.exists(detailed_path) and os.path.exists(only_path)):
+        raise FileNotFoundError(
+            f"Expected {detailed_path} and {only_path} to exist with geometry columns."
+        )
+    det_df  = pd.read_csv(detailed_path)
+    only_df = pd.read_csv(only_path)
+
+    # Ensure key dtypes are consistent
+    for df in (det_df, only_df, out_df):
+        if "row" in df.columns:
+            df["row"] = pd.to_numeric(df["row"], errors="coerce").astype("Int64")
+        if "col" in df.columns:
+            df["col"] = pd.to_numeric(df["col"], errors="coerce").astype("Int64")
+
+    # --- build update frame with the new/updated columns
+    key_cols = ["row", "col"]
+    upd = out_df[key_cols].copy()
+
+    # Per-subperiod **max concentration** columns (from model results, not scores)
+    target_cols = []  # track to know what we’ll assign into detailed file
+    for _, rw in ranks_df.iterrows():
+        span = f"{rw.start_year}_{rw.end_year}"
+        u_src = f"maxConc_{span}_E"  # UUMU (Ringold E)
+        a_src = f"maxConc_{span}_A"  # LUCR (Ringold A)
+
+        u_tgt = f"{pref}_uumu_max_conc_{span}"
+        a_tgt = f"{pref}_lucr_max_conc_{span}"
+        upd[u_tgt] = out_df[u_src]
+        upd[a_tgt] = out_df[a_src]
+        target_cols.extend([u_tgt, a_tgt])
+
+    # CLE scores (scaled preferred if present, else unscaled)
+    cle_u_col = f"{pref}_uumu_clean_level_exceedance_score"
+    cle_a_col = f"{pref}_lucr_clean_level_exceedance_score"
+    if {"S_CLE_E_scaled", "S_CLE_A_scaled"}.issubset(out_df.columns):
+        upd[cle_u_col] = out_df["S_CLE_E_scaled"]
+        upd[cle_a_col] = out_df["S_CLE_A_scaled"]
+    else:
+        upd[cle_u_col] = out_df["S_CLE_E"]
+        upd[cle_a_col] = out_df["S_CLE_A"]
+
+    # --- index-align for overwrite (avoids _x/_y)
+    det_df.set_index(key_cols, inplace=True, drop=False)
+    only_df.set_index(key_cols, inplace=True, drop=False)
+    upd.set_index(key_cols, inplace=True)
+
+    # Assign into detailed (all new columns)
+    for c in upd.columns:
+        det_df.loc[upd.index, c] = upd[c]
+
+    # Assign into only (just the scores)
+    only_df.loc[upd.index, cle_u_col] = upd[cle_u_col]
+    only_df.loc[upd.index, cle_a_col] = upd[cle_a_col]
+
+    # Reset and write back
+    det_df.reset_index(drop=True, inplace=True)
+    only_df.reset_index(drop=True, inplace=True)
+    det_df.to_csv(detailed_path, index=False)
+    only_df.to_csv(only_path, index=False)
+
+    print(f"  Updated (overwrite) {detailed_path} and {only_path} for {coc_key}.")
 
 # =============================================================================
 # Main
@@ -390,16 +658,19 @@ if __name__ == "__main__":
     # georef from shapefiles
     grid_gdf = gpd.read_file(grid_path)
     ou_gdf   = gpd.read_file(ou_path)
+    roads_gdf = gpd.read_file(rds_path) 
 
     # drop overlap OU
     if "Name" in ou_gdf.columns:
         drop_name = "Overlap: 200-ZP-1 and 200-BP-5"
         ou_gdf["Name"] = ou_gdf["Name"].astype(str).str.strip()
         ou_gdf = ou_gdf[~ou_gdf["Name"].str.fullmatch(drop_name, case=False, na=False)].copy()
-
-    # match CRS
+        
+    # match OU CRS to grid CRS
     if ou_gdf.crs != grid_gdf.crs:
         ou_gdf = ou_gdf.to_crs(grid_gdf.crs)
+    if roads_gdf.crs != grid_gdf.crs:
+        roads_gdf = roads_gdf.to_crs(grid_gdf.crs)
 
     # push georef into modelgrid (lower-left bounds; no rotation)
     llx, lly, urx, ury = grid_gdf.total_bounds
