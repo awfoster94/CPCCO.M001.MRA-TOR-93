@@ -1,0 +1,758 @@
+ F F T F T T                                      
+     20000                                        
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  1
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  2
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  3
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  4
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  5
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  6
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  7
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  8
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period  9
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 10
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 11
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 12
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 13
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 14
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 15
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 16
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 17
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 18
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 19
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 20
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 21
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 22
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 23
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 24
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 25
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 26
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 27
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 28
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 29
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 30
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 31
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 32
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 33
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 34
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 35
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 36
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 37
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 38
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 39
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 40
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 41
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 42
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 43
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 44
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 45
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 46
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 47
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 48
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 49
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 50
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 51
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 52
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 53
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 54
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 55
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 56
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 57
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 58
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 59
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 60
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 61
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 62
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 63
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 64
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 65
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 66
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 67
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 68
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 69
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 70
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 71
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 72
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 73
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 74
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 75
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 76
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 77
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 78
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 79
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 80
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 81
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 82
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 83
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 84
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 85
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 86
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 87
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 88
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 89
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 90
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 91
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 92
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 93
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 94
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 95
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 96
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 97
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 98
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period 99
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period100
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period101
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period102
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period103
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period104
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period105
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period106
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period107
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
+         1
+         0         0(10e12.4)                   -1   Recharge         
+         4       Stress Period108
+         3        65        59 0.500E+02        -1 0.500E+02     SourceTYFarm        
+         3        61        60 0.500E+02        -1 0.500E+02     SourceTFarm         
+         2        84        59 0.100E+03        -1 0.100E+03     SourceUP1           
+         2        87        59 0.125E+03        -1 0.125E+03     SourceUP1           
