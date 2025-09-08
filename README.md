@@ -2,10 +2,10 @@
 Repository for ECF-200ZP1-25-0092
 Data Gap & Redundancy Analysis
 
-last updated: 09-04-2025\
+last updated: 09-08-2025\
 by: awfoster94
 
-ReadMe Section for workflow_Smw_Sew_Scs.py\
+ReadMe Section for workflow_Smw_Sew_Scs.py
 
 1. clone this github repository to local directory of choice
    
@@ -19,7 +19,7 @@ ReadMe Section for workflow_Smw_Sew_Scs.py\
    b. cd into the cloned directory with the .yml file & workflow.py\
    c. run command: conda env create -f mp3du-hanford-env.yml -n mp3du-hanford-env
 
-3. To calculate Smw, Sew, and Sp-cs, run the workflow_Smw_Sew_Scs.py\
+3. To calculate Smw, Sew, and Sp-cs, run the workflow_Smw_Sew_Scs.py
    
    a. use an IDE (pycharm, spyder, vscode, notepad++, etc.) to open the cloned project folder and workflow_Smw_Sew_Scs.py to run each piece of the workflow as desired\
       &emsp;i. this will require using (1) virtual environment: mp3du-hanford-env\
@@ -37,7 +37,7 @@ ReadMe Section for workflow_Smw_Sew_Scs.py\
    c. review exported figures in figs folder\
    d. figs summarizing calculations and supporting shapefiles are zipped up in figs_08262025.zip\
 
-ReadMe Section for combine_scors_Smww_Sew_Scs_Smik_Scov_Sexcee.py\
+ReadMe Section for combine_scors_Smw_Sew_Scs_Smik_Scov_Sexcee.py
 
 5. Calculate Combined Total Data Gap Scores for the UU/MU & LU/CR for hex-chrome, tec99, and carbon tetrachloride\
    a. check to make sure mp3du-hanford-env has been installed as a virtual environment to run script\
@@ -46,6 +46,6 @@ ReadMe Section for combine_scors_Smww_Sew_Scs_Smik_Scov_Sexcee.py\
       ii.  scores_only_Smw_Sew_Scs.csv\
       iii. scores_detailed_Smik_Scov_Sexcee.csv\
       iv. scores_only_Smike_Scov_Sexcee.csv\
-   c. run combine_scores_SMw_Sew_Scs_Smik_Scov_Sexcee.py\
-   d. outputs generated include csv's and shapefiles with detailed supporting information and also for scores only\
+   c. run combine_scores_Smw_Sew_Scs_Smik_Scov_Sexcee.py\
+   d. outputs generated include csv's and shapefiles with detailed supporting information and also for scores only
       
