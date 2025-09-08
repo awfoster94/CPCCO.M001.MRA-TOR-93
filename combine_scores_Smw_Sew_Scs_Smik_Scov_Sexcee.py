@@ -1,0 +1,150 @@
+# -*- coding: utf-8 -*-
+"""
+Created July 2025
+
+@author: afoster
+"""
+
+##############################################################################
+##############################################################################
+
+########################## ECF-200ZP1-25-0092 ################################
+############################ python workflow #################################
+
+#### This workflow supports calculation of 3 scoring criteria in Eq (6)  ####
+#### of ECF-200ZP1-0098 Rev.0 in Section 4.2.7 Total Score (Originally). ####
+#### For each potential well location, the existing extraction and       ####
+#### monitoring wells identified in the redundancy analysis are used:    ####
+#### Combines all scores together  Smw, Sew, Scs, Smik, Scov, Sexcee     ####
+
+
+##############################################################################
+##############################################################################
+
+# note make sure to create the virtual environments from the .yml file 
+# mp3du-env-env.yml
+
+# import necessary python packages and libraries
+import os
+import glob
+import subprocess
+import shutil
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+import shapefile
+import tkinter
+import matplotlib
+matplotlib.use('TkAgg')
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from matplotlib.gridspec import GridSpec
+from shapely.geometry import Point
+from shapely.geometry import Polygon
+from shapely.geometry import LineString
+from osgeo import gdal
+from datetime import datetime
+start_time = datetime.now()
+import shapefile
+from math import sin, cos, pi
+import numpy as np
+import time
+import json
+from scipy.spatial import cKDTree
+from functools import reduce
+
+# define some global variables
+ecf_name = 'ECF-200ZP1-25-0092'
+
+# collect the local working directory
+cwd = os.getcwd()
+
+exe_d = os.path.join(cwd, 'bin', 'win')
+flow_source_d = os.path.join(cwd, 'source_files', 'flow', 'source')
+transport_source_d = os.path.join(cwd, 'source_files', 'transport')
+ptrk_calc_d = os.path.join(cwd, 'calcs', 'ptrack')
+gis_d = os.path.join(cwd, 'gis')
+fig_d = os.path.join(cwd, 'figs')
+
+# global boolen to turn the ECF workflow on, must be turned to call helper functions in the main()
+flag_combine_scores = True
+
+# booleans to turn on each calc function incrementally that are called in main()
+# perform sequentially by turning each boolen on, running function, then turning off before running the next function. 
+# Please note, figures will need to be closed as they open up for the workflow to continue forward
+
+################################################################################################
+# FIRST CODE BLOCK TO RUN. Can be run in series, turn off after successfuly completion.
+################################################################################################
+
+# combine scores Smw, Sew, Scs, Smik, Scov, Sexcee with details and scores only
+flag_combine_all_scores = True
+tag_list = ['only', 'detailed']
+################################################################################################
+
+# define helper functions for the workflow calculations
+
+# combine scores only for Smw, Sew, Scs
+def combine_all_scores(flag, gis_d, fig_d, ptrk_calc_d, tag):
+    if flag:
+        print('combine_all_scores function selected to run...')
+
+        # load in potential wells shapefile as geopandas gdf & store crs for reference
+        potential_wells_gdf = gpd.read_file(os.path.join('gis','shp','data_gap_wells', 'potential_wells.shp'))
+        crs_ref = potential_wells_gdf.crs
+
+        potential_wells_df = potential_wells_gdf.drop(columns='geometry')
+        potential_wells_df['row_col_id'] = 10000000+(10000*potential_wells_df['row'])+potential_wells_df['col']
+
+        # load in pandas dataframes
+        Smw_Sew_Scs_df = pd.read_csv(os.path.join('scores_combined', f'scores_{tag}_Smw_Sew_Scs.csv'))
+        Smik_Scov_Sexcee_df = pd.read_csv(os.path.join('scores_combined', f'scores_{tag}_Smik_Scov_Sexcee.csv'))
+        Smik_Scov_Sexcee_df['row_col_id'] = 10000000+(10000*Smik_Scov_Sexcee_df['row'])+Smik_Scov_Sexcee_df['col']
+        Smik_Scov_Sexcee_df.drop(columns=['row', 'col', 'x', 'y', 'Shape'], inplace=True)
+
+        # combine all scores
+        combined_scores_df = pd.merge(Smw_Sew_Scs_df, Smik_Scov_Sexcee_df, on='row_col_id', how='outer')
+
+        # calculate final total datagap scores
+        combined_scores_df['ctet_uumu_tdg_s'] = Smw_Sew_Scs_df['s_mw_uumu'] + Smw_Sew_Scs_df['s_ext_uumu'] + Smw_Sew_Scs_df['s_ctet_cs'] + Smik_Scov_Sexcee_df['ctet_uu_mu_mik_cv_score'] + Smik_Scov_Sexcee_df['ctet_uu_mu_mik_cov_score'] + Smik_Scov_Sexcee_df['ctet_uumu_clean_level_exceedance_score']
+        combined_scores_df['ctet_lucr_tdg_s'] = Smw_Sew_Scs_df['s_mw_lucr'] + Smw_Sew_Scs_df['s_ext_lucr'] + Smw_Sew_Scs_df['s_ctet_cs'] + Smik_Scov_Sexcee_df['ctet_lu_cr_mik_cv_score'] + Smik_Scov_Sexcee_df['ctet_lu_cr_mik_cov_score'] + Smik_Scov_Sexcee_df['ctet_lucr_clean_level_exceedance_score'] 
+
+        combined_scores_df['hcr_uumu_tdg_s'] = Smw_Sew_Scs_df['s_mw_uumu'] + Smw_Sew_Scs_df['s_ext_uumu'] + Smw_Sew_Scs_df['s_cr_cs'] + Smik_Scov_Sexcee_df['hexcr_uu_mu_mik_cv_score'] + Smik_Scov_Sexcee_df['hexcr_uu_mu_mik_cov_score'] + Smik_Scov_Sexcee_df['hexcr_uumu_clean_level_exceedance_score']
+        combined_scores_df['hcr_lucr_tdg_s'] = Smw_Sew_Scs_df['s_mw_lucr'] + Smw_Sew_Scs_df['s_ext_lucr'] + Smw_Sew_Scs_df['s_cr_cs'] + Smik_Scov_Sexcee_df['hexcr_lu_cr_mik_cv_score'] + Smik_Scov_Sexcee_df['hexcr_lu_cr_mik_cov_score'] + Smik_Scov_Sexcee_df['hexcr_lucr_clean_level_exceedance_score']
+
+        combined_scores_df['tec_uumu_tdg_s'] = Smw_Sew_Scs_df['s_mw_uumu'] + Smw_Sew_Scs_df['s_ext_uumu'] + Smw_Sew_Scs_df['s_tec_cs'] + Smik_Scov_Sexcee_df['tc99_uu_mu_mik_cv_score'] + Smik_Scov_Sexcee_df['tc99_uu_mu_mik_cov_score'] + Smik_Scov_Sexcee_df['tc99_uumu_clean_level_exceedance_score']
+        combined_scores_df['tec_lucr_tdg_s'] = Smw_Sew_Scs_df['s_mw_lucr'] + Smw_Sew_Scs_df['s_ext_lucr'] + Smw_Sew_Scs_df['s_tec_cs'] + Smik_Scov_Sexcee_df['tc99_lu_cr_mik_cv_score'] + Smik_Scov_Sexcee_df['tc99_lu_cr_mik_cov_score'] + Smik_Scov_Sexcee_df['tc99_lucr_clean_level_exceedance_score'] 
+
+        # export to csv
+        combined_scores_df.to_csv(os.path.join('scores_combined', f'scores_{tag}_Smw_Sew_Scs_Smik_Scov_Sexcee.csv'))
+
+        # create gdf from merged df and export to shapefile
+        combined_scores_gdf = gpd.GeoDataFrame(combined_scores_df, geometry = gpd.points_from_xy(combined_scores_df.EASTING, combined_scores_df.NORTHING), crs=crs_ref)
+        combined_scores_gdf.to_file(os.path.join('scores_combined', f'scores_{tag}_Smw_Sew_Scs_Smik_Scov_Sexcee.shp'))
+
+    else:
+        print('combine_all_scores function NOT selected to run...')
+
+
+# this main function contains all of the calculations, processing, plotting, scoring outputs
+def main():
+    if flag_combine_scores == True:
+
+        ################################################################################################################
+        ################################################################################################################
+        ################################## ECF-200ZP1-25-0092 Calculations Starting Here ###############################
+        ################################################################################################################
+        ################################################################################################################
+        print('combining scores for Smw, Sew, Scs, Smik, Scov, Sexcee...')
+        
+        # combine calculated scores into csvs and shapefiles for Smw, Sew, Scs, Smik, Scov, Sexcee
+        for tag in tag_list:
+            combine_all_scores(flag_combine_all_scores, gis_d, fig_d, ptrk_calc_d, tag)             
+        
+    else:
+        print('ecf calculations workflows NOT selected to run, \n check booleans...')
+
+# this runs the main function
+if __name__ == "__main__":
+    main()

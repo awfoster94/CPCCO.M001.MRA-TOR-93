@@ -1,9 +1,11 @@
 # CPCCO.M001.MRA-TOR-93
-Repository for ECF-200ZP1-25-XXXX
+Repository for ECF-200ZP1-25-0092
 Data Gap & Redundancy Analysis
 
-last updated: 08-26-2025\
+last updated: 09-04-2025\
 by: awfoster94
+
+ReadMe Section for workflow_Smw_Sew_Scs.py\
 
 1. clone this github repository to local directory of choice
    
@@ -34,5 +36,16 @@ by: awfoster94
    b. calc scores are zipped up in scores_08262025.zip in the same folder for comparison\
    c. review exported figures in figs folder\
    d. figs summarizing calculations and supporting shapefiles are zipped up in figs_08262025.zip\
-   
+
+ReadMe Section for combine_scors_Smww_Sew_Scs_Smik_Scov_Sexcee.py\
+
+5. Calculate Combined Total Data Gap Scores for the UU/MU & LU/CR for hex-chrome, tec99, and carbon tetrachloride\
+   a. check to make sure mp3du-hanford-env has been installed as a virtual environment to run script\
+   b. check to make sure the following csv's have been generated from other workflows:\
+      i.   scores_detailed_Smw_Sew_Scs.csv\
+      ii.  scores_only_Smw_Sew_Scs.csv\
+      iii. scores_detailed_Smik_Scov_Sexcee.csv\
+      iv. scores_only_Smike_Scov_Sexcee.csv\
+   c. run combine_scores_SMw_Sew_Scs_Smik_Scov_Sexcee.py\
+   d. outputs generated include csv's and shapefiles with detailed supporting information and also for scores only\
       

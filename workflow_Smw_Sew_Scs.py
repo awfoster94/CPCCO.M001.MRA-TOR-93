@@ -8,11 +8,11 @@ Created July 2025
 ##############################################################################
 ##############################################################################
 
-########################## ECF-200ZP1-25-XXXX ################################
+########################## ECF-200ZP1-25-0092 ################################
 ############################ python workflow #################################
 
 #### This workflow supports calculation of 3 scoring criteria in Eq (6)  ####
-#### of ECF-200ZP1-0098 Rev.0 in Section 4.2.7 Total Score.              ####
+#### of ECF-200ZP1-0098 Rev.0 in Section 4.2.7 Total Score (Originally). ####
 #### For each potential well location, the existing extraction and       ####
 #### monitoring wells identified in the redundancy analysis are used:    ####
 #### 1. To calculate, Smw (proximal distance to closest monitoring well) ####
@@ -55,9 +55,10 @@ import numpy as np
 import time
 import json
 from scipy.spatial import cKDTree
+from functools import reduce
 
 # define some global variables
-ecf_name = 'ECF-200ZP1-25-XXXX' # will need to update
+ecf_name = 'ECF-200ZP1-25-0092'
 
 # collect the local working directory
 cwd = os.getcwd()
@@ -93,10 +94,10 @@ flag_new_ecf = False
 # FIRST CODE BLOCK TO RUN. Can be run in series, turn off after successfuly completion.
 ################################################################################################
 # Smw calc - scoring for distance/proximity calcs monitoring wells
-flag_proximal_distance_to_mws = False
+flag_proximal_distance_to_mws = True
 
 # Sew, calc - scoring distance/proximity calcs extraction wells 
-flag_proximal_distance_to_ews = False
+flag_proximal_distance_to_ews = True
 ################################################################################################
 
 ################################################################################################
@@ -138,8 +139,14 @@ flag_parse_source_zones = False
 # Step 6. close figure
 
 # Step 7. repeat Steps 1-6 for each source area site (2 chromium, 2 technetium-99)
-flag_generate_bounding_polygon = False
-flag_generate_centerline = False
+flag_generate_bounding_and_centerline = False # Turn this boolean on, if new bounding and centerline generation is desired, otherwise will keep existing shapefiles.
+
+if flag_generate_bounding_and_centerline:
+    flag_generate_bounding_polygon = True # don't edit this, boolean above will provide direction
+    flag_generate_centerline = True # don't edit this, boolean above will provide direction
+else:
+    flag_generate_bounding_polygon = False # don't edit this, boolean above will provide direction
+    flag_generate_centerline = False # don't edit this, boolean above will provide direction
 
 # plot results of bounding polygon and centerline
 flag_generate_bounding_centerline_map_all = False
@@ -162,6 +169,11 @@ flag_generate_continuous_source_score_map_tec99 = False
 
 # ctet only (no continuing source area, so all zeros!)
 flag_calculate_continuous_source_score_ctet = False
+
+# combine scores with details for Smw, Sew, Scs
+flag_combine_all_scores_detailed = True
+# combine scores only for Smw, Sew, Scs
+flag_combine_all_scores_only = True
 ################################################################################################
 
 # define helper functions for the workflow calculations
@@ -175,158 +187,175 @@ def calc_proximal_distance_to_mws(flag, gis_d, fig_d, data_gap_wells_flag=[]):
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
-        # load in potential wells shapefile as geopandas gdf & store crs for reference
-        potential_wells_gdf = gpd.read_file(os.path.join('gis','shp','data_gap_wells', 'potential_wells.shp'))
-        crs_ref = potential_wells_gdf.crs
+        # list of HSUs
+        hsu_list = ['UU/MU', 'LU/CR']
+        for hsu in hsu_list:
+            print(hsu)
+            if hsu == 'UU/MU':
+                hsu_tag = 'uu_mu'
+            if hsu == 'LU/CR':
+                hsu_tag = 'lu_cr'
 
-        # define pandas padataframe for looping through each potential well cell
-        potential_wells_df = pd.DataFrame(columns=('row', 'col', 'EASTING', 'NORTHING'))
-        potential_wells_df['row'] = potential_wells_gdf['row']
-        potential_wells_df['col'] = potential_wells_gdf['col']
-        potential_wells_df['EASTING'] = potential_wells_gdf['x']
-        potential_wells_df['NORTHING'] = potential_wells_gdf['y']
-        potential_wells_df = potential_wells_df.reset_index(drop=True)
+            # load in potential wells shapefile as geopandas gdf & store crs for reference
+            potential_wells_gdf = gpd.read_file(os.path.join('gis','shp','data_gap_wells', 'potential_wells.shp'))
+            crs_ref = potential_wells_gdf.crs
+
+            # define pandas padataframe for looping through each potential well cell
+            potential_wells_df = pd.DataFrame(columns=('row', 'col', 'EASTING', 'NORTHING'))
+            potential_wells_df['row'] = potential_wells_gdf['row']
+            potential_wells_df['col'] = potential_wells_gdf['col']
+            potential_wells_df['EASTING'] = potential_wells_gdf['x']
+            potential_wells_df['NORTHING'] = potential_wells_gdf['y']
+            potential_wells_df = potential_wells_df.reset_index(drop=True)
 
 
-        if data_gap_wells_flag == 'updated':
+            if data_gap_wells_flag == 'updated':
 
-            # load in updated redundancy analysis well locations
-            redundancy_2025_wells = pd.read_csv(os.path.join('gis', 'xlsx', '2025RedundancyGapAnalysis_WellHSUList.csv'))
-            redundancy_2025_wells['WELL_NAME'] = redundancy_2025_wells['NAME']
-            print(redundancy_2025_wells)
-            # load in recent hwis data pull well location information
-            hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'))
-            hwis_pull_csv_reduced = hwis_pull_csv[['WELL_ID', 'WELL_NAME', 'NORTHING', 'EASTING']]
-            hwis_pull_csv_reduced['NORTHING_HWIS'] = hwis_pull_csv_reduced['NORTHING']
-            hwis_pull_csv_reduced['EASTING_HWIS'] = hwis_pull_csv_reduced['EASTING']
+                # load in updated analysis well locations
+                all_2025_wells = pd.read_csv(os.path.join('gis', 'xlsx', 'ECF-200-ZP1-25-0092', 'Table-A-2-Candidate-Wells', 'Table-A-2-Candidate-Wells.csv'))
+                all_2025_wells = all_2025_wells[all_2025_wells['Final_Assignment'] == hsu]
+                all_2025_wells['WELL_NAME'] = all_2025_wells['NAME']
+                print(all_2025_wells)
+                # load in recent hwis data pull well location information
+                hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'), encoding="cp1252") # may need to modify or remove coding, if loading error occurs
+                hwis_pull_csv_reduced = hwis_pull_csv[['WELL_ID', 'WELL_NAME', 'NORTHING', 'EASTING']]
+                hwis_pull_csv_reduced['NORTHING_HWIS'] = hwis_pull_csv_reduced['NORTHING']
+                hwis_pull_csv_reduced['EASTING_HWIS'] = hwis_pull_csv_reduced['EASTING']
+                
+
+                all_2025_wells_merged = all_2025_wells.merge(hwis_pull_csv_reduced, how='left', on='WELL_NAME', suffixes=("", "_new"))
+
+                # load in recent heis data pull well location information
+                Manual_GW_CY2025_GWSR_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'Manual_GW_CY2025_GWSR_TO93.txt'), delimiter=',', header=0)
+                Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
+                Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
+                all_2025_wells_merged_2 = all_2025_wells_merged.merge(Manual_GW_CY2025_GWSR_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_GWSR"))
+
+                # load if necessary
+                #qryAWLN_SSPA_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN_SSPA_TO93.txt'), delimiter=',', header=0)
+                #qryAWLN2021_Present_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN2021_Present_TO93.txt'), delimiter=',', header=0)
+                
+                qryMANHEIS_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryMANHEIS_TO93.txt'), delimiter=',', header=0)
+                qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
+                qryMANHEIS_TO93_txt_reduced['NORTHING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['NORTHING']
+                qryMANHEIS_TO93_txt_reduced['EASTING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['EASTING']
+                qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced[['WELL_NAME', 'NORTHING_MANHEIS', 'EASTING_MANHEIS']]
+                qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
+                all_2025_wells_merged_3 = all_2025_wells_merged_2.merge(qryMANHEIS_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_HEIS"))
+                all_2025_wells_merged_3['NORTHING'] = all_2025_wells_merged_3['NORTHING '].fillna(all_2025_wells_merged_3['NORTHING_MANHEIS'])
+                all_2025_wells_merged_3['EASTING'] = all_2025_wells_merged_3['EASTING '].fillna(all_2025_wells_merged_3['EASTING_MANHEIS'])
+                all_2025_wells_merged_3['NORTHING'] = all_2025_wells_merged_3['NORTHING'].fillna(all_2025_wells_merged_3['northing_m_check'])
+                all_2025_wells_merged_3['EASTING'] = all_2025_wells_merged_3['EASTING'].fillna(all_2025_wells_merged_3['easting_m_check'])
+                
+                all_2025_wells_merged_3['Well_Name'] = all_2025_wells_merged_3['WELL_NAME']
+                #all_2025_wells_merged_3 = all_2025_wells_merged_3[['Well_Name', 'NAME', 'GWIA', 'easting_m_check', 'northing_m_check', 'Final_Assignment', 'TYPE_scripts', 'HSU_source', 'WELL_NAME', 'WELL_ID', 'NORTHING', 'EASTING']]
+                all_2025_wells_merged_3 = all_2025_wells_merged_3[['Well_Name', 'NAME', 'GWIA', 'Final_Assignment', 'TYPE_scripts', 'HSU_source', 'WELL_ID', 'NORTHING', 'EASTING']]
+
+                # determine extractors & monitoring wells
+                ext_wells_list = ['EXTRACTION']
+                candidate_wells_ext = all_2025_wells_merged_3[all_2025_wells_merged_3['TYPE_scripts'].isin(ext_wells_list)]
+
+                mw_wells_list = ['MONITORING'] #'CHARACTERIZATION']
+                candidate_wells_mw = all_2025_wells_merged_3[all_2025_wells_merged_3['TYPE_scripts'].isin(mw_wells_list)]
+
+            if data_gap_wells_flag == 'existing':
+
+                # load in recent hwis pull
+                hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'), encoding="cp1252") # may need to modify or remove coding, if loading error occurs
+                
+                # in the recent hwis pull well name 299-W19-113 is not identified as extraction, but in the previous (existing) ECF-200-ZP1-22-0098 it is..
+                hwis_pull_csv.loc[hwis_pull_csv['WELL_NAME'] == '299-W19-113', 'WELL_PROJECT_PURPOSES'] = 'EXTRACTION'
+                
+                ext_wells_list = ['DATA REPORT, EXTRACTION', 'EXTRACTION', 'EXTRACTION, GROUNDWATER SAMPLE']
+                hwis_pull_csv_ext = hwis_pull_csv[hwis_pull_csv['WELL_PROJECT_PURPOSES'].isin(ext_wells_list)]
+
+                # load exsiting wells dataset from previous (existing) ECF-200-ZP1-22-0098 Table A-2 Candidate Wells 
+                existing_candidate_wells = pd.read_csv(os.path.join(gis_d, 'xlsx', 'ECF-200-ZP1-22-0098', 'Table-A-2-Candidate-Wells', 'Table-A-2-Candidate-Wells_A20-A40.csv'))
+
+                # define candidate extraction wells        
+                candidate_wells_ext = existing_candidate_wells[existing_candidate_wells['Well_Name'].isin(hwis_pull_csv_ext['WELL_NAME'].to_list())]
+
+                # define candidate monitoring wells
+                candidate_wells_mw = existing_candidate_wells[~existing_candidate_wells['Well_Name'].isin(candidate_wells_ext['Well_Name'].to_list())]
+                
+            # calculate proximity/distances for each data gap grid cell for extraction wells
+            mw_proximity_dist_m = []
+            for i in range(0, len(potential_wells_df)):
+                #print(f"i is: {i}")
+                #print(f"the Easting (m), Northing (m) is: {potential_wells_df.iloc[i]['EASTING']}, {potential_wells_df.iloc[i]['NORTHING']}")
+                dist_mw_m = []
+                for j in range(0, len(candidate_wells_mw)):
+
+                    # calc distance to each potential well location for each monitoring well
+                    dist_m = np.sqrt(((candidate_wells_mw.iloc[j]['EASTING'] - potential_wells_df.iloc[i]['EASTING']) ** 2) + ((candidate_wells_mw.iloc[j]['NORTHING'] - potential_wells_df.iloc[i]['NORTHING']) ** 2))
+                    dist_mw_m.append((candidate_wells_mw.iloc[j]['Well_Name'], dist_m))
+
+                dist_mw_m_df = pd.DataFrame(dist_mw_m, columns=('Well_Name', 'Distance_meters'))
+                prox_mw_df = dist_mw_m_df.loc[dist_mw_m_df['Distance_meters'].idxmin()]
+                mw_proximity_dist_m.append((potential_wells_df.iloc[i]['row'], potential_wells_df.iloc[i]['col'], potential_wells_df.iloc[i]['EASTING'], potential_wells_df.iloc[i]['NORTHING'], prox_mw_df['Well_Name'], prox_mw_df['Distance_meters']))
+            mw_proximity_dist_m_df = pd.DataFrame(mw_proximity_dist_m, columns=('row', 'col', 'EASTING_m', 'NORTHING_m', 'Mw_Well_Name', 'Distance_meters'))
             
+            # calculate monitoring well scoring based on distances
+            mw_proximity_dist_m_df['score_mw'] = -9999
+            for k in range(0, len(mw_proximity_dist_m_df)):
 
-            redundancy_2025_wells_merged = redundancy_2025_wells.merge(hwis_pull_csv_reduced, how='left', on='WELL_NAME', suffixes=("", "_new"))
+                dist_m = mw_proximity_dist_m_df.at[k, 'Distance_meters']
 
-            # load in recent heis data pull well location information
-            Manual_GW_CY2025_GWSR_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'Manual_GW_CY2025_GWSR_TO93.txt'), delimiter=',', header=0)
-            Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
-            Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
-            redundancy_2025_wells_merged_2 = redundancy_2025_wells_merged.merge(Manual_GW_CY2025_GWSR_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_GWSR"))
+                # assign scoring
+                if dist_m < 200:
+                    mw_proximity_dist_m_df.at[k, 'score_mw'] = 0
+                elif 200 <= dist_m < 400:
+                    mw_proximity_dist_m_df.at[k, 'score_mw'] = 1
+                elif 400 <= dist_m < 600:
+                    mw_proximity_dist_m_df.at[k, 'score_mw'] = 2
+                elif 600 <= dist_m < 800:
+                    mw_proximity_dist_m_df.at[k, 'score_mw'] = 3
+                elif dist_m >= 800:
+                    mw_proximity_dist_m_df.at[k, 'score_mw'] = 4
 
+            # add row_col_id
+            mw_proximity_dist_m_df['row_col_id'] = 10000000+(10000*mw_proximity_dist_m_df['row'])+mw_proximity_dist_m_df['col']
             
-            qryAWLN_SSPA_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN_SSPA_TO93.txt'), delimiter=',', header=0)
-            qryAWLN2021_Present_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN2021_Present_TO93.txt'), delimiter=',', header=0)
+            # create and export shapefile of results
+            mw_proximity_dist_m_gdf = gpd.GeoDataFrame(mw_proximity_dist_m_df, geometry = gpd.points_from_xy(mw_proximity_dist_m_df.EASTING_m, mw_proximity_dist_m_df.NORTHING_m), crs=crs_ref)
+            mw_proximity_dist_m_gdf.to_file(os.path.join(outdir, f'score_monitoring_well_proximity_{hsu_tag}.shp'))
+
+            # create geodrataframes with geopandas to plot
+            candidate_wells_ext_gdf = gpd.GeoDataFrame(candidate_wells_ext, geometry = gpd.points_from_xy(candidate_wells_ext.EASTING, candidate_wells_ext.NORTHING), crs=crs_ref)
+            candidate_wells_mw_gdf = gpd.GeoDataFrame(candidate_wells_mw, geometry = gpd.points_from_xy(candidate_wells_mw.EASTING, candidate_wells_mw.NORTHING), crs=crs_ref)
+
+            # export candidate monitoring wells
+            candidate_wells_mw_gdf.to_file(os.path.join(outdir, f'candidate_mws_{hsu_tag}.shp'))
+
+            # plot the results
+
+            # Define the color bands and corresponding colors
+            color_bands = [(0.0000000001, 0.1), (0.1, 1.01), (1.01, 2.01), (2.01, 3.01), (3.01, 4.01)]
+            colors = ['lightyellow', 'yellow', 'darkorange', 'orangered', 'red']
+                
+            fig,ax = plt.subplots(figsize=(10,10), dpi=400)
+            potential_wells_gdf.plot(ax=ax, color='grey', markersize=2, label='potential well locations')
+            colorflood_legend_elements = []
+            # plot proximity score here
+            for (low, high), color in zip(color_bands, colors):
+                subset = mw_proximity_dist_m_gdf[(mw_proximity_dist_m_gdf['score_mw'] >= low) & (mw_proximity_dist_m_gdf['score_mw'] < high)]
+                subset.plot(ax=ax, marker='o', edgecolor=color, facecolor=color, alpha=1, label=f'{low}-{high}')
+                # Add corresponding legend patch
+                colorflood_legend_elements.append(Patch(facecolor=color, edgecolor='black', alpha=1, label=f'{low}-{high}'))
+            #candidate_wells_ext_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
+            candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
             
-            qryMANHEIS_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryMANHEIS_TO93.txt'), delimiter=',', header=0)
-            qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
-            qryMANHEIS_TO93_txt_reduced['NORTHING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['NORTHING']
-            qryMANHEIS_TO93_txt_reduced['EASTING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['EASTING']
-            qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced[['WELL_NAME', 'NORTHING_MANHEIS', 'EASTING_MANHEIS']]
-            qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
-            redundancy_2025_wells_merged_3 = redundancy_2025_wells_merged_2.merge(qryMANHEIS_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_HEIS"))
+            plt.legend()
+            plt.title(f'Score - Monitoring Well Proximal Distance \n {hsu}')
+            plt.ylabel('Northing (m)')
+            plt.xlabel('Easting (m)')
+            plt.tight_layout()
+            plt.savefig(os.path.join(fig_d, f'score_monitoring_well_proximity_{hsu_tag}.png'), dpi=400)
+            plt.show()
+            plt.close()
 
-            redundancy_2025_wells_merged_3['NORTHING'] = redundancy_2025_wells_merged_3['NORTHING '].fillna(redundancy_2025_wells_merged_3['NORTHING_MANHEIS'])
-            redundancy_2025_wells_merged_3['EASTING'] = redundancy_2025_wells_merged_3['EASTING '].fillna(redundancy_2025_wells_merged_3['EASTING_MANHEIS'])
-            redundancy_2025_wells_merged_3['Well_Name'] = redundancy_2025_wells_merged_3['WELL_NAME']
-            redundancy_2025_wells_merged_3 = redundancy_2025_wells_merged_3[['Well_Name', 'NAME', 'CP_scripts', 'TYPE_scripts', 'HSU_scripts', 'ANALYTE_scripts', 'Zone_SGW-38815', 'HSU_Assignment_ECF-200ZP1-22-0098', 'Final_Assignment', 'Determination_Based_On', 'WELL_NAME', 'WELL_ID', 'NORTHING', 'EASTING']]
-
-            # determine extractors & monitoring wells
-            ext_wells_list = ['EXTRACTION']
-            existing_candidate_wells_ext = redundancy_2025_wells_merged_3[redundancy_2025_wells_merged_3['TYPE_scripts'].isin(ext_wells_list)]
-
-            mw_wells_list = ['MONITORING', 'CHARACTERIZATION']
-            existing_candidate_wells_mw = redundancy_2025_wells_merged_3[redundancy_2025_wells_merged_3['TYPE_scripts'].isin(mw_wells_list)]
-
-        if data_gap_wells_flag == 'existing':
-
-            # load in recent hwis pull
-            hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'))
-            
-            # in the recent hwis pull well name 299-W19-113 is not identified as extraction, but in the previous (existing) ECF-200-ZP1-22-2098 it is..
-            hwis_pull_csv.loc[hwis_pull_csv['WELL_NAME'] == '299-W19-113', 'WELL_PROJECT_PURPOSES'] = 'EXTRACTION'
-            
-            ext_wells_list = ['DATA REPORT, EXTRACTION', 'EXTRACTION', 'EXTRACTION, GROUNDWATER SAMPLE']
-            hwis_pull_csv_ext = hwis_pull_csv[hwis_pull_csv['WELL_PROJECT_PURPOSES'].isin(ext_wells_list)]
-
-            # load exsiting wells dataset from previous (existing) ECF-200-ZP1-22-2098 Table A-2 Candidate Wells 
-            existing_candidate_wells = pd.read_csv(os.path.join(gis_d, 'xlsx', 'ECF-200-ZP1-22-2098', 'Table-A-2-Candidate-Wells', 'Table-A-2-Candidate-Wells_A20-A40.csv'))
-
-            # define candidate extraction wells        
-            existing_candidate_wells_ext = existing_candidate_wells[existing_candidate_wells['Well_Name'].isin(hwis_pull_csv_ext['WELL_NAME'].to_list())]
-
-            # define candidate monitoring wells
-            existing_candidate_wells_mw = existing_candidate_wells[~existing_candidate_wells['Well_Name'].isin(existing_candidate_wells_ext['Well_Name'].to_list())]
-            
-        # calculate proximity/distances for each data gap grid cell for extraction wells
-        mw_proximity_dist_m = []
-        for i in range(0, len(potential_wells_df)):
-            #print(f"i is: {i}")
-            #print(f"the Easting (m), Northing (m) is: {potential_wells_df.iloc[i]['EASTING']}, {potential_wells_df.iloc[i]['NORTHING']}")
-            dist_mw_m = []
-            for j in range(0, len(existing_candidate_wells_mw)):
-
-                # calc distance to each potential well location for each monitoring well
-                dist_m = np.sqrt(((existing_candidate_wells_mw.iloc[j]['EASTING'] - potential_wells_df.iloc[i]['EASTING']) ** 2) + ((existing_candidate_wells_mw.iloc[j]['NORTHING'] - potential_wells_df.iloc[i]['NORTHING']) ** 2))
-                dist_mw_m.append((existing_candidate_wells_mw.iloc[j]['Well_Name'], dist_m))
-
-            dist_mw_m_df = pd.DataFrame(dist_mw_m, columns=('Well_Name', 'Distance_meters'))
-            prox_mw_df = dist_mw_m_df.loc[dist_mw_m_df['Distance_meters'].idxmin()]
-            mw_proximity_dist_m.append((potential_wells_df.iloc[i]['row'], potential_wells_df.iloc[i]['col'], potential_wells_df.iloc[i]['EASTING'], potential_wells_df.iloc[i]['NORTHING'], prox_mw_df['Well_Name'], prox_mw_df['Distance_meters']))
-        mw_proximity_dist_m_df = pd.DataFrame(mw_proximity_dist_m, columns=('row', 'col', 'EASTING_m', 'NORTHING_m', 'Mw_Well_Name', 'Distance_meters'))
-        
-        # calculate monitoring well scoring based on distances
-        mw_proximity_dist_m_df['score_mw'] = -9999
-        for k in range(0, len(mw_proximity_dist_m_df)):
-
-            dist_m = mw_proximity_dist_m_df.at[k, 'Distance_meters']
-
-            # assign scoring
-            if dist_m < 200:
-                mw_proximity_dist_m_df.at[k, 'score_mw'] = 0
-            elif 200 <= dist_m < 400:
-                mw_proximity_dist_m_df.at[k, 'score_mw'] = 1
-            elif 400 <= dist_m < 600:
-                mw_proximity_dist_m_df.at[k, 'score_mw'] = 2
-            elif 600 <= dist_m < 800:
-                mw_proximity_dist_m_df.at[k, 'score_mw'] = 3
-            elif dist_m >= 800:
-                mw_proximity_dist_m_df.at[k, 'score_mw'] = 4
-
-        # create and export shapefile of results
-        mw_proximity_dist_m_gdf = gpd.GeoDataFrame(mw_proximity_dist_m_df, geometry = gpd.points_from_xy(mw_proximity_dist_m_df.EASTING_m, mw_proximity_dist_m_df.NORTHING_m), crs=crs_ref)
-        mw_proximity_dist_m_gdf.to_file(os.path.join(outdir, 'score_monitoring_well_proximity.shp'))
-
-        # create geodrataframes with geopandas to plot
-        existing_candidate_wells_ext_gdf = gpd.GeoDataFrame(existing_candidate_wells_ext, geometry = gpd.points_from_xy(existing_candidate_wells_ext.EASTING, existing_candidate_wells_ext.NORTHING), crs=crs_ref)
-        existing_candidate_wells_mw_gdf = gpd.GeoDataFrame(existing_candidate_wells_mw, geometry = gpd.points_from_xy(existing_candidate_wells_mw.EASTING, existing_candidate_wells_mw.NORTHING), crs=crs_ref)
-
-        # export existing candidate monitoring wells
-        existing_candidate_wells_mw_gdf.to_file(os.path.join(outdir, 'existing_candidate_mws.shp'))
-
-        # plot the results
-
-        # Define the color bands and corresponding colors
-        color_bands = [(0.0000000001, 0.1), (0.1, 1.01), (1.01, 2.01), (2.01, 3.01), (3.01, 4.01)]
-        colors = ['lightyellow', 'yellow', 'darkorange', 'orangered', 'red']
-            
-        fig,ax = plt.subplots(figsize=(10,10), dpi=400)
-        potential_wells_gdf.plot(ax=ax, color='grey', markersize=2, label='potential well locations')
-        colorflood_legend_elements = []
-        # plot proximity score here
-        for (low, high), color in zip(color_bands, colors):
-            subset = mw_proximity_dist_m_gdf[(mw_proximity_dist_m_gdf['score_mw'] >= low) & (mw_proximity_dist_m_gdf['score_mw'] < high)]
-            subset.plot(ax=ax, marker='o', edgecolor=color, facecolor=color, alpha=1, label=f'{low}-{high}')
-            # Add corresponding legend patch
-            colorflood_legend_elements.append(Patch(facecolor=color, edgecolor='black', alpha=1, label=f'{low}-{high}'))
-        existing_candidate_wells_ext_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
-        
-        plt.legend()
-        plt.title('Score - Monitoring Well Proximal Distance')
-        plt.ylabel('Northing (m)')
-        plt.xlabel('Easting (m)')
-        plt.tight_layout()
-        plt.savefig(os.path.join(fig_d, 'score_monitoring_well_proximity.png'), dpi=400)
-        plt.show()
-        plt.close()
-    else:
-        print('calc_proximal_distance_to_mws function selected to NOT run...')
+        else:
+            print('calc_proximal_distance_to_mws function selected to NOT run...')
 
 # this function calculates the proximal distance to nearest extraction well for each potential well cell
 def calc_proximal_distance_to_ews(flag, gis_d, fig_d, data_gap_wells_flag=[]):
@@ -338,156 +367,173 @@ def calc_proximal_distance_to_ews(flag, gis_d, fig_d, data_gap_wells_flag=[]):
         if not os.path.exists(outdir):
             os.makedirs(outdir)
 
-        # load in potential wells shapefile as geopandas gdf & store crs for reference
-        potential_wells_gdf = gpd.read_file(os.path.join('gis','shp','data_gap_wells', 'potential_wells.shp'))
-        crs_ref = potential_wells_gdf.crs
+        # list of HSUs
+        hsu_list = ['UU/MU', 'LU/CR']
+        for hsu in hsu_list:
+            print(hsu)
+            if hsu == 'UU/MU':
+                hsu_tag = 'uu_mu'
+            if hsu == 'LU/CR':
+                hsu_tag = 'lu_cr'
 
-        # define pandas padataframe for looping through each potential well cell
-        potential_wells_df = pd.DataFrame(columns=('row', 'col', 'EASTING', 'NORTHING'))
-        potential_wells_df['row'] = potential_wells_gdf['row']
-        potential_wells_df['col'] = potential_wells_gdf['col']
-        potential_wells_df['EASTING'] = potential_wells_gdf['x']
-        potential_wells_df['NORTHING'] = potential_wells_gdf['y']
-        potential_wells_df = potential_wells_df.reset_index(drop=True)
+            # load in potential wells shapefile as geopandas gdf & store crs for reference
+            potential_wells_gdf = gpd.read_file(os.path.join('gis','shp','data_gap_wells', 'potential_wells.shp'))
+            crs_ref = potential_wells_gdf.crs
+
+            # define pandas padataframe for looping through each potential well cell
+            potential_wells_df = pd.DataFrame(columns=('row', 'col', 'EASTING', 'NORTHING'))
+            potential_wells_df['row'] = potential_wells_gdf['row']
+            potential_wells_df['col'] = potential_wells_gdf['col']
+            potential_wells_df['EASTING'] = potential_wells_gdf['x']
+            potential_wells_df['NORTHING'] = potential_wells_gdf['y']
+            potential_wells_df = potential_wells_df.reset_index(drop=True)
 
 
-        if data_gap_wells_flag == 'updated':
+            if data_gap_wells_flag == 'updated':
 
-            # load in updated redundancy analysis well locations
-            redundancy_2025_wells = pd.read_csv(os.path.join('gis', 'xlsx', '2025RedundancyGapAnalysis_WellHSUList.csv'))
-            redundancy_2025_wells['WELL_NAME'] = redundancy_2025_wells['NAME']
-            print(redundancy_2025_wells)
-            # load in recent hwis data pull well location information
-            hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'))
-            hwis_pull_csv_reduced = hwis_pull_csv[['WELL_ID', 'WELL_NAME', 'NORTHING', 'EASTING']]
-            hwis_pull_csv_reduced['NORTHING_HWIS'] = hwis_pull_csv_reduced['NORTHING']
-            hwis_pull_csv_reduced['EASTING_HWIS'] = hwis_pull_csv_reduced['EASTING']
+                # load in updated analysis well locations
+                all_2025_wells = pd.read_csv(os.path.join('gis', 'xlsx', 'ECF-200-ZP1-25-0092', 'Table-A-2-Candidate-Wells', 'Table-A-2-Candidate-Wells.csv'))
+                all_2025_wells = all_2025_wells[all_2025_wells['Final_Assignment'] == hsu]
+                all_2025_wells['WELL_NAME'] = all_2025_wells['NAME']
+                print(all_2025_wells)
+                # load in recent hwis data pull well location information
+                hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'), encoding="cp1252") # may need to modify or remove coding, if loading error occurs
+                hwis_pull_csv_reduced = hwis_pull_csv[['WELL_ID', 'WELL_NAME', 'NORTHING', 'EASTING']]
+                hwis_pull_csv_reduced['NORTHING_HWIS'] = hwis_pull_csv_reduced['NORTHING']
+                hwis_pull_csv_reduced['EASTING_HWIS'] = hwis_pull_csv_reduced['EASTING']
+                
+
+                all_2025_wells_merged = all_2025_wells.merge(hwis_pull_csv_reduced, how='left', on='WELL_NAME', suffixes=("", "_new"))
+
+                # load in recent heis data pull well location information
+                Manual_GW_CY2025_GWSR_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'Manual_GW_CY2025_GWSR_TO93.txt'), delimiter=',', header=0)
+                Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
+                Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
+                all_2025_wells_merged_2 = all_2025_wells_merged.merge(Manual_GW_CY2025_GWSR_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_GWSR"))
+
+                # load if necessary
+                #qryAWLN_SSPA_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN_SSPA_TO93.txt'), delimiter=',', header=0)
+                #qryAWLN2021_Present_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN2021_Present_TO93.txt'), delimiter=',', header=0)
+                
+                qryMANHEIS_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryMANHEIS_TO93.txt'), delimiter=',', header=0)
+                qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
+                qryMANHEIS_TO93_txt_reduced['NORTHING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['NORTHING']
+                qryMANHEIS_TO93_txt_reduced['EASTING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['EASTING']
+                qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced[['WELL_NAME', 'NORTHING_MANHEIS', 'EASTING_MANHEIS']]
+                qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
+                all_2025_wells_merged_3 = all_2025_wells_merged_2.merge(qryMANHEIS_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_HEIS"))
+
+                all_2025_wells_merged_3['NORTHING'] = all_2025_wells_merged_3['NORTHING '].fillna(all_2025_wells_merged_3['NORTHING_MANHEIS'])
+                all_2025_wells_merged_3['EASTING'] = all_2025_wells_merged_3['EASTING '].fillna(all_2025_wells_merged_3['EASTING_MANHEIS'])
+                all_2025_wells_merged_3['NORTHING'] = all_2025_wells_merged_3['NORTHING'].fillna(all_2025_wells_merged_3['northing_m_check'])
+                all_2025_wells_merged_3['EASTING'] = all_2025_wells_merged_3['EASTING'].fillna(all_2025_wells_merged_3['easting_m_check'])
+                all_2025_wells_merged_3['Well_Name'] = all_2025_wells_merged_3['WELL_NAME']
+                #all_2025_wells_merged_3 = all_2025_wells_merged_3[['Well_Name', 'NAME', 'GWIA', 'easting_m_check', 'northing_m_check', 'Final_Assignment', 'TYPE_scripts', 'HSU_source', 'WELL_NAME', 'WELL_ID', 'NORTHING', 'EASTING']]
+                all_2025_wells_merged_3 = all_2025_wells_merged_3[['Well_Name', 'NAME', 'GWIA', 'Final_Assignment', 'TYPE_scripts', 'HSU_source', 'WELL_ID', 'NORTHING', 'EASTING']]
+
+                # determine extractors & monitoring wells
+                ext_wells_list = ['EXTRACTION']
+                candidate_wells_ext = all_2025_wells_merged_3[all_2025_wells_merged_3['TYPE_scripts'].isin(ext_wells_list)]
+
+                mw_wells_list = ['MONITORING'] #'CHARACTERIZATION']
+                candidate_wells_mw = all_2025_wells_merged_3[all_2025_wells_merged_3['TYPE_scripts'].isin(mw_wells_list)]
+
+            if data_gap_wells_flag == 'existing':
+
+                # load in recent hwis pull
+                hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'), encoding="cp1252") # may need to modify or remove coding, if loading error occurs
+                
+                # in the recent hwis pull well name 299-W19-113 is not identified as extraction, but in the previous (existing) ECF-200-ZP1-22-0098 it is..
+                hwis_pull_csv.loc[hwis_pull_csv['WELL_NAME'] == '299-W19-113', 'WELL_PROJECT_PURPOSES'] = 'EXTRACTION'
+                
+                ext_wells_list = ['DATA REPORT, EXTRACTION', 'EXTRACTION', 'EXTRACTION, GROUNDWATER SAMPLE']
+                hwis_pull_csv_ext = hwis_pull_csv[hwis_pull_csv['WELL_PROJECT_PURPOSES'].isin(ext_wells_list)]
+
+                # load wells dataset from previous (existing) ECF-200-ZP1-22-0098 Table A-2 Candidate Wells 
+                candidate_wells = pd.read_csv(os.path.join(gis_d, 'xlsx', 'ECF-200-ZP1-22-0098', 'Table-A-2-Candidate-Wells', 'Table-A-2-Candidate-Wells_A20-A40.csv'))
+                candidate_wells = candidate_wells[candidate_wells['HSU_Assignment'] == hsu]
+                # define candidate extraction wells        
+                candidate_wells_ext = candidate_wells[candidate_wells['Well_Name'].isin(hwis_pull_csv_ext['WELL_NAME'].to_list())]
+
+                # define candidate monitoring wells
+                candidate_wells_mw =candidate_wells[~candidate_wells['Well_Name'].isin(candidate_wells_ext['Well_Name'].to_list())]
+                
+            # calculate proximity/distances for each data gap grid cell for extraction wells
+            ext_proximity_dist_m = []
+            for i in range(0, len(potential_wells_df)):
+                #print(f"i is: {i}")
+                #print(f"the Easting (m), Northing (m) is: {potential_wells_df.iloc[i]['EASTING']}, {potential_wells_df.iloc[i]['NORTHING']}")
+                dist_calc_ext = []
+                dist_ext_m = []
+                for j in range(0, len(candidate_wells_ext)):
+                    # calc distance to each potential well location for each monitoring well
+                    dist_m = np.sqrt(((candidate_wells_ext.iloc[j]['EASTING'] - potential_wells_df.iloc[i]['EASTING']) ** 2) + ((candidate_wells_ext.iloc[j]['NORTHING'] - potential_wells_df.iloc[i]['NORTHING']) ** 2))
+
+                    dist_ext_m.append((candidate_wells_ext.iloc[j]['Well_Name'], dist_m))
+
+                dist_ext_m_df = pd.DataFrame(dist_ext_m, columns=('Well_Name', 'Distance_meters'))
+                prox_ext_df = dist_ext_m_df.loc[dist_ext_m_df['Distance_meters'].idxmin()]
+                ext_proximity_dist_m.append((potential_wells_df.iloc[i]['row'], potential_wells_df.iloc[i]['col'], potential_wells_df.iloc[i]['EASTING'], potential_wells_df.iloc[i]['NORTHING'], prox_ext_df['Well_Name'], prox_ext_df['Distance_meters']))
+            ext_proximity_dist_m_df = pd.DataFrame(ext_proximity_dist_m, columns=('row', 'col', 'EASTING_m', 'NORTHING_m', 'Ext_Well_Name', 'Distance_meters'))
             
+            # calculate extraction well scoring based on distances
+            ext_proximity_dist_m_df['score_ext'] = -9999
+            for k in range(0, len(ext_proximity_dist_m_df)):
 
-            redundancy_2025_wells_merged = redundancy_2025_wells.merge(hwis_pull_csv_reduced, how='left', on='WELL_NAME', suffixes=("", "_new"))
+                dist_m = ext_proximity_dist_m_df.at[k, 'Distance_meters']
 
-            # load in recent heis data pull well location information
-            Manual_GW_CY2025_GWSR_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'Manual_GW_CY2025_GWSR_TO93.txt'), delimiter=',', header=0)
-            Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
-            Manual_GW_CY2025_GWSR_TO93_txt_reduced = Manual_GW_CY2025_GWSR_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
-            redundancy_2025_wells_merged_2 = redundancy_2025_wells_merged.merge(Manual_GW_CY2025_GWSR_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_GWSR"))
+                # assign scoring
+                if dist_m < 50:
+                    ext_proximity_dist_m_df.at[k, 'score_ext'] = 4
+                elif 50 <= dist_m < 100:
+                    ext_proximity_dist_m_df.at[k, 'score_ext'] = 3
+                elif 100 <= dist_m < 200:
+                    ext_proximity_dist_m_df.at[k, 'score_ext'] = 2
+                elif 200 <= dist_m < 300:
+                    ext_proximity_dist_m_df.at[k, 'score_ext'] = 1
+                elif dist_m >= 300:
+                    ext_proximity_dist_m_df.at[k, 'score_ext'] = 0
 
+            # add row_col_id
+            ext_proximity_dist_m_df['row_col_id'] = 10000000+(10000*ext_proximity_dist_m_df['row'])+ext_proximity_dist_m_df['col']
+
+            # create and export shapefile of results
+            ext_proximity_dist_m_gdf = gpd.GeoDataFrame(ext_proximity_dist_m_df, geometry = gpd.points_from_xy(ext_proximity_dist_m_df.EASTING_m, ext_proximity_dist_m_df.NORTHING_m), crs=crs_ref)
+            ext_proximity_dist_m_gdf.to_file(os.path.join(outdir, f'score_extraction_well_proximity_{hsu_tag}.shp'))
+
+            # create geodrataframes with geopandas to plot
+            candidate_wells_ext_gdf = gpd.GeoDataFrame(candidate_wells_ext, geometry = gpd.points_from_xy(candidate_wells_ext.EASTING, candidate_wells_ext.NORTHING), crs=crs_ref)
+            candidate_wells_mw_gdf = gpd.GeoDataFrame(candidate_wells_mw, geometry = gpd.points_from_xy(candidate_wells_mw.EASTING, candidate_wells_mw.NORTHING), crs=crs_ref)
+
+            # export candidate extraction wells
+            candidate_wells_ext_gdf.to_file(os.path.join(outdir, f'candidate_ews_{hsu_tag}.shp'))
+
+            # plot the results
+
+            # Define the color bands and corresponding colors
+            color_bands = [(0.0000000001, 0.1), (0.1, 1.01), (1.01, 2.01), (2.01, 3.01), (3.01, 4.01)]
+            colors = ['lightyellow', 'yellow', 'darkorange', 'orangered', 'red']
+                
+            fig,ax = plt.subplots(figsize=(10,10), dpi=400)
+            potential_wells_gdf.plot(ax=ax, color='grey', markersize=2, label='potential well locations')
+            colorflood_legend_elements = []
+            # plot proximity score here
+            for (low, high), color in zip(color_bands, colors):
+                subset = ext_proximity_dist_m_gdf[(ext_proximity_dist_m_gdf['score_ext'] >= low) & (ext_proximity_dist_m_gdf['score_ext'] < high)]
+                subset.plot(ax=ax, marker='o', edgecolor=color, facecolor=color, alpha=1, label=f'{low}-{high}')
+                # Add corresponding legend patch
+                colorflood_legend_elements.append(Patch(facecolor=color, edgecolor='black', alpha=1, label=f'{low}-{high}'))
+            candidate_wells_ext_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label=f'candidate extraction wells {hsu}')
+            #candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
             
-            qryAWLN_SSPA_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN_SSPA_TO93.txt'), delimiter=',', header=0)
-            qryAWLN2021_Present_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryAWLN2021_Present_TO93.txt'), delimiter=',', header=0)
-            
-            qryMANHEIS_TO93_txt = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HEIS_Data_Pull', 'qryMANHEIS_TO93.txt'), delimiter=',', header=0)
-            qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt[['WELL_NAME', 'NORTHING', 'EASTING']]
-            qryMANHEIS_TO93_txt_reduced['NORTHING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['NORTHING']
-            qryMANHEIS_TO93_txt_reduced['EASTING_MANHEIS'] = qryMANHEIS_TO93_txt_reduced['EASTING']
-            qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced[['WELL_NAME', 'NORTHING_MANHEIS', 'EASTING_MANHEIS']]
-            qryMANHEIS_TO93_txt_reduced = qryMANHEIS_TO93_txt_reduced.drop_duplicates(subset='WELL_NAME')
-            redundancy_2025_wells_merged_3 = redundancy_2025_wells_merged_2.merge(qryMANHEIS_TO93_txt_reduced, how='left', on='WELL_NAME', suffixes=(" ", "_HEIS"))
-
-            redundancy_2025_wells_merged_3['NORTHING'] = redundancy_2025_wells_merged_3['NORTHING '].fillna(redundancy_2025_wells_merged_3['NORTHING_MANHEIS'])
-            redundancy_2025_wells_merged_3['EASTING'] = redundancy_2025_wells_merged_3['EASTING '].fillna(redundancy_2025_wells_merged_3['EASTING_MANHEIS'])
-            redundancy_2025_wells_merged_3['Well_Name'] = redundancy_2025_wells_merged_3['WELL_NAME']
-            redundancy_2025_wells_merged_3 = redundancy_2025_wells_merged_3[['Well_Name', 'NAME', 'CP_scripts', 'TYPE_scripts', 'HSU_scripts', 'ANALYTE_scripts', 'Zone_SGW-38815', 'HSU_Assignment_ECF-200ZP1-22-0098', 'Final_Assignment', 'Determination_Based_On', 'WELL_NAME', 'WELL_ID', 'NORTHING', 'EASTING']]
-
-            # determine extractors & monitoring wells
-            ext_wells_list = ['EXTRACTION']
-            existing_candidate_wells_ext = redundancy_2025_wells_merged_3[redundancy_2025_wells_merged_3['TYPE_scripts'].isin(ext_wells_list)]
-
-            mw_wells_list = ['MONITORING', 'CHARACTERIZATION']
-            existing_candidate_wells_mw = redundancy_2025_wells_merged_3[redundancy_2025_wells_merged_3['TYPE_scripts'].isin(mw_wells_list)]
-
-        if data_gap_wells_flag == 'existing':
-
-            # load in recent hwis pull
-            hwis_pull_csv = pd.read_csv(os.path.join(gis_d, 'xlsx', 'HWIS_Data_Pull', 'qryHWIS_TO93.csv'))
-            
-            # in the recent hwis pull well name 299-W19-113 is not identified as extraction, but in the previous (existing) ECF-200-ZP1-22-2098 it is..
-            hwis_pull_csv.loc[hwis_pull_csv['WELL_NAME'] == '299-W19-113', 'WELL_PROJECT_PURPOSES'] = 'EXTRACTION'
-            
-            ext_wells_list = ['DATA REPORT, EXTRACTION', 'EXTRACTION', 'EXTRACTION, GROUNDWATER SAMPLE']
-            hwis_pull_csv_ext = hwis_pull_csv[hwis_pull_csv['WELL_PROJECT_PURPOSES'].isin(ext_wells_list)]
-
-            # load exsiting wells dataset from previous (existing) ECF-200-ZP1-22-2098 Table A-2 Candidate Wells 
-            existing_candidate_wells = pd.read_csv(os.path.join(gis_d, 'xlsx', 'ECF-200-ZP1-22-2098', 'Table-A-2-Candidate-Wells', 'Table-A-2-Candidate-Wells_A20-A40.csv'))
-
-            # define candidate extraction wells        
-            existing_candidate_wells_ext = existing_candidate_wells[existing_candidate_wells['Well_Name'].isin(hwis_pull_csv_ext['WELL_NAME'].to_list())]
-
-            # define candidate monitoring wells
-            existing_candidate_wells_mw = existing_candidate_wells[~existing_candidate_wells['Well_Name'].isin(existing_candidate_wells_ext['Well_Name'].to_list())]
-            
-        # calculate proximity/distances for each data gap grid cell for extraction wells
-        ext_proximity_dist_m = []
-        for i in range(0, len(potential_wells_df)):
-            #print(f"i is: {i}")
-            #print(f"the Easting (m), Northing (m) is: {potential_wells_df.iloc[i]['EASTING']}, {potential_wells_df.iloc[i]['NORTHING']}")
-            dist_calc_ext = []
-            dist_ext_m = []
-            for j in range(0, len(existing_candidate_wells_ext)):
-                # calc distance to each potential well location for each monitoring well
-                dist_m = np.sqrt(((existing_candidate_wells_ext.iloc[j]['EASTING'] - potential_wells_df.iloc[i]['EASTING']) ** 2) + ((existing_candidate_wells_ext.iloc[j]['NORTHING'] - potential_wells_df.iloc[i]['NORTHING']) ** 2))
-
-                dist_ext_m.append((existing_candidate_wells_ext.iloc[j]['Well_Name'], dist_m))
-
-            dist_ext_m_df = pd.DataFrame(dist_ext_m, columns=('Well_Name', 'Distance_meters'))
-            prox_ext_df = dist_ext_m_df.loc[dist_ext_m_df['Distance_meters'].idxmin()]
-            ext_proximity_dist_m.append((potential_wells_df.iloc[i]['row'], potential_wells_df.iloc[i]['col'], potential_wells_df.iloc[i]['EASTING'], potential_wells_df.iloc[i]['NORTHING'], prox_ext_df['Well_Name'], prox_ext_df['Distance_meters']))
-        ext_proximity_dist_m_df = pd.DataFrame(ext_proximity_dist_m, columns=('row', 'col', 'EASTING_m', 'NORTHING_m', 'Ext_Well_Name', 'Distance_meters'))
-        
-        # calculate extraction well scoring based on distances
-        ext_proximity_dist_m_df['score_ext'] = -9999
-        for k in range(0, len(ext_proximity_dist_m_df)):
-
-            dist_m = ext_proximity_dist_m_df.at[k, 'Distance_meters']
-
-            # assign scoring
-            if dist_m < 50:
-                ext_proximity_dist_m_df.at[k, 'score_ext'] = 4
-            elif 50 <= dist_m < 100:
-                ext_proximity_dist_m_df.at[k, 'score_ext'] = 3
-            elif 100 <= dist_m < 200:
-                ext_proximity_dist_m_df.at[k, 'score_ext'] = 2
-            elif 200 <= dist_m < 300:
-                ext_proximity_dist_m_df.at[k, 'score_ext'] = 1
-            elif dist_m >= 300:
-                ext_proximity_dist_m_df.at[k, 'score_ext'] = 0
-
-        # create and export shapefile of results
-        ext_proximity_dist_m_gdf = gpd.GeoDataFrame(ext_proximity_dist_m_df, geometry = gpd.points_from_xy(ext_proximity_dist_m_df.EASTING_m, ext_proximity_dist_m_df.NORTHING_m), crs=crs_ref)
-        ext_proximity_dist_m_gdf.to_file(os.path.join(outdir, 'score_extraction_well_proximity.shp'))
-
-        # create geodrataframes with geopandas to plot
-        existing_candidate_wells_ext_gdf = gpd.GeoDataFrame(existing_candidate_wells_ext, geometry = gpd.points_from_xy(existing_candidate_wells_ext.EASTING, existing_candidate_wells_ext.NORTHING), crs=crs_ref)
-        existing_candidate_wells_mw_gdf = gpd.GeoDataFrame(existing_candidate_wells_mw, geometry = gpd.points_from_xy(existing_candidate_wells_mw.EASTING, existing_candidate_wells_mw.NORTHING), crs=crs_ref)
-
-        # export existing candidate extraction wells
-        existing_candidate_wells_ext_gdf.to_file(os.path.join(outdir, 'existing_candidate_ews.shp'))
-
-        # plot the results
-
-        # Define the color bands and corresponding colors
-        color_bands = [(0.0000000001, 0.1), (0.1, 1.01), (1.01, 2.01), (2.01, 3.01), (3.01, 4.01)]
-        colors = ['lightyellow', 'yellow', 'darkorange', 'orangered', 'red']
-            
-        fig,ax = plt.subplots(figsize=(10,10), dpi=400)
-        potential_wells_gdf.plot(ax=ax, color='grey', markersize=2, label='potential well locations')
-        colorflood_legend_elements = []
-        # plot proximity score here
-        for (low, high), color in zip(color_bands, colors):
-            subset = ext_proximity_dist_m_gdf[(ext_proximity_dist_m_gdf['score_ext'] >= low) & (ext_proximity_dist_m_gdf['score_ext'] < high)]
-            subset.plot(ax=ax, marker='o', edgecolor=color, facecolor=color, alpha=1, label=f'{low}-{high}')
-            # Add corresponding legend patch
-            colorflood_legend_elements.append(Patch(facecolor=color, edgecolor='black', alpha=1, label=f'{low}-{high}'))
-        existing_candidate_wells_ext_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
-        
-        plt.legend()
-        plt.title('Score - Extraction Well Proximal Distance')
-        plt.ylabel('Northing (m)')
-        plt.xlabel('Easting (m)')
-        plt.tight_layout()
-        plt.savefig(os.path.join(fig_d, 'score_extraction_well_proximity.png'), dpi=400)
-        plt.show()
+            plt.legend()
+            plt.title(f'Score - Extraction Well Proximal Distance \n {hsu}')
+            plt.ylabel('Northing (m)')
+            plt.xlabel('Easting (m)')
+            plt.tight_layout()
+            plt.savefig(os.path.join(fig_d, f'score_extraction_well_proximity_{hsu_tag}.png'), dpi=400)
+            plt.show()
+            plt.close()
     else:
         print('calc_proximal_distance_to_ews function selected NOT to run...')
 
@@ -1094,7 +1140,7 @@ def generate_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         tec99_pathlines.plot(ax=ax, linewidth=0.2, color='fuchsia', zorder=1, alpha=0.5, label='tec-99 mp3du pathlines')
         cr_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
         tec99_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=1, alpha=1, label='tec-99 particle starting locations')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
         existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
         existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
@@ -1110,7 +1156,7 @@ def generate_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
             Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
             Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
             Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
@@ -1132,6 +1178,7 @@ def generate_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         else:
             plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_map_centroids.png'), dpi=400)
         plt.show()
+        plt.close()
 
     else:
         print('generate_pathlines_map function selected NOT to run...')
@@ -1208,7 +1255,7 @@ def generate_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         tec99_endpoints.plot(ax=ax, edgecolor='fuchsia', zorder=1, facecolor='None', alpha=0.5, label='tec-99 mp3du endpoints')
         cr_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
         tec99_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=1, alpha=1, label='tec-99 particle starting locations')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
         existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
         existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
@@ -1224,7 +1271,7 @@ def generate_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
             Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
             Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
             Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
@@ -1246,6 +1293,7 @@ def generate_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         else:
             plt.savefig(os.path.join(fig_d, 'mp3du_endpoints_map_centroids.png'), dpi=400)
         plt.show()
+        plt.close()
 
     else:
         print('generate_endpoints_map function selected NOT to run...')
@@ -1329,7 +1377,7 @@ def generate_pathlines_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type)
         tec99_endpoints.plot(ax=ax, edgecolor='fuchsia', zorder=1, facecolor='None', alpha=0.5, label='tec-99 mp3du endpoints')
         cr_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
         tec99_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=1, alpha=1, label='tec-99 particle starting locations')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
         cr_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=1, alpha=0.5, label='cr mp3du pathlines')
         tec99_pathlines.plot(ax=ax, linewidth=0.2, color='fuchsia', zorder=1, alpha=0.5, label='tec-99 mp3du pathlines')
@@ -1347,7 +1395,7 @@ def generate_pathlines_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type)
             Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
             Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
             Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
@@ -1505,7 +1553,7 @@ def generate_relcount_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
         cr_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
         tec99_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=1, alpha=1, label='tec-99 particle starting locations')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
         existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
         existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
@@ -1528,7 +1576,7 @@ def generate_relcount_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
             Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
             Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
             Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
@@ -1552,6 +1600,7 @@ def generate_relcount_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         else:
             plt.savefig(os.path.join(fig_d, 'mp3du_relative_count_pathlines_map_centroids.png'), dpi=400)
         plt.show()
+        plt.close()
 
     else:
         print('generate_relcount_pathlines_map function selected NOT to run...')
@@ -1592,8 +1641,6 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        #te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
         wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
@@ -1613,6 +1660,9 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
             part_starts = gpd.sjoin(cr_part_starts, source_area_gdf, how = 'inner', predicate='intersects')
             part_pathlines = gpd.sjoin(cr_pathlines, source_area_gdf,how = 'inner', predicate='intersects')
             part_endpoints = cr_endpoints
+
+            # load in source area polygon
+            source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
         
         if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
             source_area_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', source_area+'.shp'))
@@ -1629,13 +1679,16 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
             part_pathlines = gpd.sjoin(tec99_pathlines, source_area_gdf,how = 'inner', predicate='intersects')
             part_endpoints = tec99_endpoints
 
+            # load in source area polygon
+            source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
         # check model grid crs
         mdgrd_crs = model_grid_gdf.crs
-        crsrc_crs = cr_source_gpf.crs
+        src_crs = source_gpf.crs
 
-        if not mdgrd_crs == crsrc_crs:
+        if not mdgrd_crs == src_crs:
             print('updating the crs of the model grid for consistency...')
-            model_grid_gdf.to_crs(crsrc_crs)
+            model_grid_gdf.to_crs(src_crs)
         else:
             print('the crs of the model grid is not being updated for consistency...')
 
@@ -1660,40 +1713,72 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
         hwis_data_gdf_red = gpd.GeoDataFrame(hwis_data_df_red, geometry=hwis_data_df_red_geometry, crs=mdgrd_crs)
         hwis_data_gdf_red.to_file(os.path.join(gis_d, 'shp', 'misc', 'hwis_data_gdf_reduced.shp'))
 
-        # load in existing candidate monitoring wells and extraction wells
-        existing_candidate_wells_mw_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_mws.shp'))
-        existing_candidate_wells_ew_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_ews.shp'))
+        # load in candidate monitoring wells and extraction wells
+        candidate_wells_mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_uu_mu.shp'))
+        candidate_wells_ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_uu_mu.shp'))
+        candidate_wells_mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_lu_cr.shp'))
+        candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
-
-        cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='source zones')
-        #te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='cr source zones')
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
         wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        part_endpoints.plot(ax=ax, edgecolor='chocolate', markersize=4, zorder=1, facecolor='None', alpha=0.5, label='mp3du endpoints')
-        part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='particle starting locations')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            part_endpoints.plot(ax=ax, edgecolor='chocolate', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='cr mp3du endpoints')
+            part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            part_endpoints.plot(ax=ax, edgecolor='fuchsia', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='tec99 mp3du endpoints')
+            part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=3, alpha=1, label='tec99 particle starting locations')
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        part_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=1, alpha=0.5, label='mp3du pathlines')
-        existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            part_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=2, alpha=0.5, label='cr p3du pathlines')
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            part_pathlines.plot(ax=ax, linewidth=0.2, color='fuchsia', zorder=2, alpha=0.5, label='tec99 p3du pathlines')
+        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
 
         # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='mp3du endpoints'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='mp3du pathlines'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
-        ]
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='cr source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR')
+            ]
+
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            legend_elements = [
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=1, label='tec99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec99 mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR')
+            ]
 
         #ax.legend(handles=legend_elements, loc='upper right')
 
@@ -1732,11 +1817,31 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
             polygon_points.append(polygon_points[0])  # Close loop
             polygon = Polygon(polygon_points)
             gdf = gpd.GeoDataFrame({'geometry':[polygon]}, crs=mdgrd_crs)
-            gdf.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_bounding.shp'))
+            gdf.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_bounding_raw.shp'))
             print(f'Polygon created for {source_area}')
         else:
             polygon = None
             print(f'Not enough points to create a polygon for {source_area}...')
+
+        # Smooth the generated polygon using Chaikin's Algorithm
+        def chaikin_algo(coords, iterations = 3):
+            for _ in range(iterations):
+                new_coords=[]
+                for i in range(len(coords)-1):
+                    p1 = coords[i]
+                    p2 = coords[i+1]
+                    Q = (0.75 * p1[0] + 0.25 * p2[0], 0.75 * p1[1] + 0.25 * p2[1])
+                    R = (0.25 * p1[0] + 0.75 * p2[0], 0.25 * p1[1] + 0.75 * p2[1])
+                    new_coords.extend([Q,R])
+                new_coords.append(new_coords[0])
+                coords = new_coords
+            return coords
+        
+        raw_polygon_coords = polygon_points
+        chaikin_polygon_coords = chaikin_algo(raw_polygon_coords, iterations=3)
+        chaikin_polygon = Polygon(chaikin_polygon_coords)
+        gdf_final = gpd.GeoDataFrame({'geometry': [chaikin_polygon]}, crs=mdgrd_crs)
+        gdf_final.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_bounding_final.shp'))
 
     else:
         print('generate_bounding_polygon function selected NOT to run...')
@@ -1772,7 +1877,7 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
             part_starts = gpd.sjoin(cr_part_starts, source_area_gdf, how = 'inner', predicate='intersects')
             part_pathlines = gpd.sjoin(cr_pathlines, source_area_gdf,how = 'inner', predicate='intersects')
             part_endpoints = cr_endpoints
-            bounding_polygon = gpd.read_file(os.path.join('gis', 'shp', 'pathlines', f'{source_area}_bounding.shp'))
+            bounding_polygon = gpd.read_file(os.path.join('gis', 'shp', 'pathlines', f'{source_area}_bounding_final.shp'))
         
         if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
             source_area_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', source_area+'.shp'))
@@ -1788,15 +1893,15 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
             part_starts = gpd.sjoin(tec99_part_starts, source_area_gdf, how = 'inner', predicate='intersects')
             part_pathlines = gpd.sjoin(tec99_pathlines, source_area_gdf,how = 'inner', predicate='intersects')
             part_endpoints = tec99_endpoints
-            bounding_polygon = gpd.read_file(os.path.join('gis', 'shp', 'pathlines', f'{source_area}_bounding.shp'))
+            bounding_polygon = gpd.read_file(os.path.join('gis', 'shp', 'pathlines', f'{source_area}_bounding_final.shp'))
 
         # check model grid crs
         mdgrd_crs = model_grid_gdf.crs
-        crsrc_crs = cr_source_gpf.crs
+        src_crs = source_area_gdf.crs
 
-        if not mdgrd_crs == crsrc_crs:
+        if not mdgrd_crs == src_crs:
             print('updating the crs of the model grid for consistency...')
-            model_grid_gdf.to_crs(crsrc_crs)
+            model_grid_gdf.to_crs(src_crs)
         else:
             print('the crs of the model grid is not being updated for consistency...')
 
@@ -1821,43 +1926,76 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
         hwis_data_gdf_red = gpd.GeoDataFrame(hwis_data_df_red, geometry=hwis_data_df_red_geometry, crs=mdgrd_crs)
         hwis_data_gdf_red.to_file(os.path.join(gis_d, 'shp', 'misc', 'hwis_data_gdf_reduced.shp'))
 
-        # load in existing candidate monitoring wells and extraction wells
-        existing_candidate_wells_mw_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_mws.shp'))
-        existing_candidate_wells_ew_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_ews.shp'))
+        # load in candidate monitoring wells and extraction wells
+        candidate_wells_mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_uu_mu.shp'))
+        candidate_wells_ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_uu_mu.shp'))
+        candidate_wells_mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_lu_cr.shp'))
+        candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
-
-        cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='source zones')
-        #te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            source_area_gdf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='cr source zones')
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            source_area_gdf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
         wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        part_endpoints.plot(ax=ax, edgecolor='chocolate', markersize=4, zorder=1, facecolor='None', alpha=0.5, label='mp3du endpoints')
-        part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='particle starting locations')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            part_endpoints.plot(ax=ax, edgecolor='chocolate', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='cr mp3du endpoints')
+            part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            part_endpoints.plot(ax=ax, edgecolor='fuchsia', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='tec99 mp3du endpoints')
+            part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=3, alpha=1, label='tec99 particle starting locations')
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        part_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=1, alpha=0.5, label='mp3du pathlines')
-        existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            part_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=2, alpha=0.5, label='cr p3du pathlines')
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            part_pathlines.plot(ax=ax, linewidth=0.2, color='fuchsia', zorder=2, alpha=0.5, label='tec99 p3du pathlines')
+        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
         bounding_polygon.plot(ax=ax, facecolor='salmon', edgecolor='black', alpha=0.25, label='bounding polygon for source area')
 
         # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='mp3du endpoints'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='mp3du pathlines'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells'),
-            Patch(facecolor='salmon', edgecolor='black', alpha=0.25, label='bounding polygon for source area')
-        ]
-
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='salmon', edgecolor='black', alpha=0.25, label='bounding polygon for source area')
+            ]
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec99 mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec99 mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='salmon', edgecolor='black', alpha=0.25, label='bounding polygon for source area')
+            ]
         #ax.legend(handles=legend_elements, loc='upper right')
 
         plt.ylim([136000, 137250])
@@ -1894,7 +2032,7 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
         if len(centerline_points) >= 2:
             centerline = LineString(centerline_points)
             gdf = gpd.GeoDataFrame({'geometry':[centerline]}, crs=mdgrd_crs)
-            gdf.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline.shp'))
+            gdf.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_final.shp'))
             print(f'Centerline created for {source_area}')
         else:
             polygon = None
@@ -1944,19 +2082,21 @@ def generate_bounding_centerline_map_all(flag, gis_d, fig_d, ptrk_calc_d, part_t
         hwis_data_gdf_red = gpd.GeoDataFrame(hwis_data_df_red, geometry=hwis_data_df_red_geometry, crs=mdgrd_crs)
         hwis_data_gdf_red.to_file(os.path.join(gis_d, 'shp', 'misc', 'hwis_data_gdf_reduced.shp'))
 
-        # load in existing candidate monitoring wells and extraction wells
-        existing_candidate_wells_mw_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_mws.shp'))
-        existing_candidate_wells_ew_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_ews.shp'))
+        # load in candidate monitoring wells and extraction wells
+        candidate_wells_mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_uu_mu.shp'))
+        candidate_wells_ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_uu_mu.shp'))
+        candidate_wells_mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_lu_cr.shp'))
+        candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
         # load in bounding polygons and centerlines
-        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding.shp'))
-        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding.shp'))
-        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding.shp'))
-        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding.shp')) 
-        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline.shp'))
-        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline.shp'))
-        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline.shp'))
-        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline.shp'))
+        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
+        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
+        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
+        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
+        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
+        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
+        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
+        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
 
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
@@ -1966,10 +2106,12 @@ def generate_bounding_centerline_map_all(flag, gis_d, fig_d, ptrk_calc_d, part_t
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
         wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
+        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
         cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
         cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
         cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
@@ -1986,10 +2128,12 @@ def generate_bounding_centerline_map_all(flag, gis_d, fig_d, ptrk_calc_d, part_t
             Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
             Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
             Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
             Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
             Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
             Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
@@ -2022,7 +2166,7 @@ def generate_bounding_centerline_map_all(flag, gis_d, fig_d, ptrk_calc_d, part_t
 def centerline_to_points(flag, gis_d, fig_d, ptrk_calc_d, source_area):
     if flag:
         print(f'turning centerlines into points for {source_area}...')
-        polyline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline.shp'))
+        polyline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_final.shp'))
         crs_ref = polyline.crs
         spacing = 1 # meters
         points = []
@@ -2042,7 +2186,7 @@ def centerline_to_points(flag, gis_d, fig_d, ptrk_calc_d, source_area):
         points_gdf = gpd.GeoDataFrame(points, crs=crs_ref)
         points_gdf['x'] = points_gdf.geometry.x
         points_gdf['y'] = points_gdf.geometry.y
-        points_gdf.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_points.shp'))
+        points_gdf.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_final_points.shp'))
     else:
         print('centerline_to_points function selected NOT to run...')
 
@@ -2053,7 +2197,7 @@ def potential_wells_in_bounding(flag, gis_d, fig_d,ptrk_calc_d, source_area):
         # load in potential well locations
         potential_well_locations = gpd.read_file(os.path.join(gis_d, 'shp', 'data_gap_wells', 'potential_wells.shp'))
         # load bounding polygon for respective source area
-        bounding_polygon = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_bounding.shp'))
+        bounding_polygon = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_bounding_final.shp'))
         polygon = bounding_polygon.geometry.iloc[0]  # Assuming you want the first polygon
         locations_within_polygon = potential_well_locations[potential_well_locations.geometry.within(polygon)]
         locations_within_polygon.to_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_potential_well_locations.shp'))
@@ -2068,7 +2212,7 @@ def calculate_continuous_source_score_all(flag, gis_d, fig_d, ptrk_calc_d, sourc
         for source_area in source_area_list:
             locations_within_polygon = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines',f'{source_area}_potential_well_locations.shp'))
             crs_ref = locations_within_polygon.crs
-            centerline_points = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_points.shp'))
+            centerline_points = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_final_points.shp'))
             coords_a = np.array(list(zip(locations_within_polygon.geometry.x, locations_within_polygon.geometry.y)))
             coords_b = np.array(list(zip(centerline_points.geometry.x, centerline_points.geometry.y)))
             tree = cKDTree(coords_b)
@@ -2166,21 +2310,24 @@ def generate_continuous_source_score_map_all(flag, gis_d, fig_d, ptrk_calc_d, pa
         hwis_data_gdf_red = gpd.GeoDataFrame(hwis_data_df_red, geometry=hwis_data_df_red_geometry, crs=mdgrd_crs)
         hwis_data_gdf_red.to_file(os.path.join(gis_d, 'shp', 'misc', 'hwis_data_gdf_reduced.shp'))
 
-        # load in existing candidate monitoring wells and extraction wells
-        existing_candidate_wells_mw_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_mws.shp'))
-        existing_candidate_wells_ew_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_ews.shp'))
+        # load in candidate monitoring wells and extraction wells
+        candidate_wells_mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_uu_mu.shp'))
+        candidate_wells_ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_uu_mu.shp'))
+        candidate_wells_mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_lu_cr.shp'))
+        candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
+
         # load in bounding polygons and centerlines
-        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding.shp'))
-        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding.shp'))
-        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding.shp'))
-        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding.shp')) 
-        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline.shp'))
-        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline.shp'))
-        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline.shp'))
-        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline.shp'))
+        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
+        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
+        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
+        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
+        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
+        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
+        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
+        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
 
         # load continuous source score points
-        continuous_source_score_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'continuous_source_scores.shp'))
+        continuous_source_score_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'all_combined_continuous_source_scores.shp'))
 
         # Define the color bands and corresponding colors
         color_bands = [(0, 0.3), (0.3, 0.6), (0.6, 1.0), (1.0, 1.3), (1.3, 1.6),
@@ -2196,10 +2343,12 @@ def generate_continuous_source_score_map_all(flag, gis_d, fig_d, ptrk_calc_d, pa
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
         wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
+        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
         cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
         cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
         cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
@@ -2224,10 +2373,12 @@ def generate_continuous_source_score_map_all(flag, gis_d, fig_d, ptrk_calc_d, pa
             Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
             Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
             Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
             Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
             Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
             Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
@@ -2299,14 +2450,17 @@ def generate_continuous_source_score_map_chromium(flag, gis_d, fig_d, ptrk_calc_
         hwis_data_gdf_red = gpd.GeoDataFrame(hwis_data_df_red, geometry=hwis_data_df_red_geometry, crs=mdgrd_crs)
         hwis_data_gdf_red.to_file(os.path.join(gis_d, 'shp', 'misc', 'hwis_data_gdf_reduced.shp'))
 
-        # load in existing candidate monitoring wells and extraction wells
-        existing_candidate_wells_mw_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_mws.shp'))
-        existing_candidate_wells_ew_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_ews.shp'))
+        # load in candidate monitoring wells and extraction wells
+        candidate_wells_mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_uu_mu.shp'))
+        candidate_wells_ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_uu_mu.shp'))
+        candidate_wells_mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_lu_cr.shp'))
+        candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
+
         # load in bounding polygons and centerlines
-        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding.shp'))
-        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding.shp'))
-        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline.shp'))
-        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline.shp'))
+        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
+        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
+        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
+        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
 
 
         # load continuous source score points
@@ -2326,10 +2480,12 @@ def generate_continuous_source_score_map_chromium(flag, gis_d, fig_d, ptrk_calc_
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
         wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
+        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
         cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
         cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
         cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
@@ -2351,10 +2507,12 @@ def generate_continuous_source_score_map_chromium(flag, gis_d, fig_d, ptrk_calc_
             Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
             Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
             Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
             Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
             Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
             Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
@@ -2422,15 +2580,17 @@ def generate_continuous_source_score_map_tec99(flag, gis_d, fig_d, ptrk_calc_d, 
         hwis_data_gdf_red = gpd.GeoDataFrame(hwis_data_df_red, geometry=hwis_data_df_red_geometry, crs=mdgrd_crs)
         hwis_data_gdf_red.to_file(os.path.join(gis_d, 'shp', 'misc', 'hwis_data_gdf_reduced.shp'))
 
-        # load in existing candidate monitoring wells and extraction wells
-        existing_candidate_wells_mw_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_mws.shp'))
-        existing_candidate_wells_ew_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'existing_candidate_ews.shp'))
-        # load in bounding polygons and centerlines
+        # load in candidate monitoring wells and extraction wells
+        candidate_wells_mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_uu_mu.shp'))
+        candidate_wells_ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_uu_mu.shp'))
+        candidate_wells_mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_mws_lu_cr.shp'))
+        candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
-        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding.shp'))
-        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding.shp')) 
-        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline.shp'))
-        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline.shp'))
+        # load in bounding polygons and centerlines
+        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
+        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
+        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
+        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
 
         # load continuous source score points
         continuous_source_score_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'tec99_continuous_source_scores.shp'))
@@ -2449,10 +2609,12 @@ def generate_continuous_source_score_map_tec99(flag, gis_d, fig_d, ptrk_calc_d, 
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
         wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor=None, alpha=0.2, label='data gap locations'),
+        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        existing_candidate_wells_ew_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells')
-        existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
+        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
         tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tech99 north bounding polygon')
         tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tech99 north centerline')
         tec99_south_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.25, label='tec99 south bounding polygon')
@@ -2473,10 +2635,12 @@ def generate_continuous_source_score_map_tec99(flag, gis_d, fig_d, ptrk_calc_d, 
             Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
             Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
             Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor=None, markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
             Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
             Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tech99 north bounding polygon'),
             Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tech99 north centerline'),
             Patch(facecolor='fuchsia', edgecolor='black', alpha=0.2, label='tec99 south bounding polygon'),
@@ -2511,7 +2675,7 @@ def calculate_continuous_source_score_chromium(flag, gis_d, fig_d, ptrk_calc_d, 
         for source_area in source_area_list:
             locations_within_polygon = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines',f'{source_area}_potential_well_locations.shp'))
             crs_ref = locations_within_polygon.crs
-            centerline_points = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_points.shp'))
+            centerline_points = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_final_points.shp'))
             coords_a = np.array(list(zip(locations_within_polygon.geometry.x, locations_within_polygon.geometry.y)))
             coords_b = np.array(list(zip(centerline_points.geometry.x, centerline_points.geometry.y)))
             tree = cKDTree(coords_b)
@@ -2574,7 +2738,7 @@ def calculate_continuous_source_score_tec99(flag, gis_d, fig_d, ptrk_calc_d, sou
         for source_area in source_area_list:
             locations_within_polygon = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines',f'{source_area}_potential_well_locations.shp'))
             crs_ref = locations_within_polygon.crs
-            centerline_points = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_points.shp'))
+            centerline_points = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', f'{source_area}_centerline_final_points.shp'))
             coords_a = np.array(list(zip(locations_within_polygon.geometry.x, locations_within_polygon.geometry.y)))
             coords_b = np.array(list(zip(centerline_points.geometry.x, centerline_points.geometry.y)))
             tree = cKDTree(coords_b)
@@ -2650,13 +2814,185 @@ def calculate_continuous_source_score_ctet(flag, gis_d, fig_d, ptrk_calc_d):
     else:
         print('calculate_continuous_source_score function selected NOT to run for ctet...')
 
+# combine scores only for Smw, Sew, Scs
+def combine_all_scores_only(flag, gis_d, fig_d, ptrk_calc_d):
+    if flag:
+        print('combine_all_scores_only function selected to run...')
+
+        # load in potential wells shapefile as geopandas gdf & store crs for reference
+        potential_wells_gdf = gpd.read_file(os.path.join('gis','shp','data_gap_wells', 'potential_wells.shp'))
+        crs_ref = potential_wells_gdf.crs
+
+        potential_wells_df = potential_wells_gdf.drop(columns='geometry')
+        potential_wells_df['row_col_id'] = 10000000+(10000*potential_wells_df['row'])+potential_wells_df['col']
+
+        # load in individual scoring shapefiles as gdfs
+        mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_monitoring_well_proximity_uu_mu.shp'))
+        mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_monitoring_well_proximity_lu_cr.shp'))
+        ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_extraction_well_proximity_uu_mu.shp'))
+        ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_extraction_well_proximity_lu_cr.shp'))
+        cr_cs_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'chromium_continuous_source_scores.shp'))
+        tec99_cs_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'tec99_continuous_source_scores.shp'))
+        ctet_cs_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'ctet_continuous_source_scores.shp'))
+
+        # store only necessary information
+        mw_uumu_df = mw_uumu_gdf[['row_col_id', 'score_mw']]
+        ew_uumu_df = ew_uumu_gdf[['row_col_id', 'score_ext']]
+        mw_lucr_df = mw_lucr_gdf[['row_col_id', 'score_mw']]
+        ew_lucr_df = ew_lucr_gdf[['row_col_id', 'score_ext']]
+        cr_cs_df = cr_cs_gdf[['row_col_id', 'final_scor']]
+        tec99_cs_df = tec99_cs_gdf[['row_col_id', 'final_scor']]
+        ctet_cs_df = ctet_cs_gdf[['row_col_id', 'final_scor']]
+
+        # fill nan vals with zeros
+        cr_cs_df['final_scor'] = cr_cs_df['final_scor'].fillna(0).astype(int)
+        tec99_cs_df['final_scor'] = tec99_cs_df['final_scor'].fillna(0).astype(int)
+        ctet_cs_df['final_scor'] = ctet_cs_df['final_scor'].fillna(0).astype(int)
+
+        # add in score detail in column name
+        mw_uumu_df.rename(columns={'score_mw': 's_mw_uumu'}, inplace=True)
+        ew_uumu_df.rename(columns={'score_ext': 's_ext_uumu'}, inplace=True)
+        mw_lucr_df.rename(columns={'score_mw': 's_mw_lucr'}, inplace=True)
+        ew_lucr_df.rename(columns={'score_ext': 's_ext_lucr'}, inplace=True)
+        cr_cs_df.rename(columns={'final_scor': 's_cr_cs'}, inplace=True)
+        tec99_cs_df.rename(columns={'final_scor': 's_tec_cs'}, inplace=True)
+        ctet_cs_df.rename(columns={'final_scor': 's_ctet_cs'}, inplace=True)
+
+        # merge into one df
+        dfs_to_merge = [potential_wells_df, mw_uumu_df, ew_uumu_df, mw_lucr_df, ew_lucr_df, cr_cs_df, tec99_cs_df, ctet_cs_df]
+
+        combined_scores_df = reduce(lambda left, right: pd.merge(left, right, on='row_col_id', how='outer'), dfs_to_merge)
+        
+        outpth = os.path.join('scores_combined')
+        if not os.path.exists(outpth):
+            os.makedirs(outpth)
+
+        combined_scores_df['NORTHING'] = combined_scores_df['y'] # meters
+        combined_scores_df['EASTING'] = combined_scores_df['x'] # meters
+
+        combined_scores_df.to_csv(os.path.join(outpth, 'scores_only_Smw_Sew_Scs.csv'))
+
+        # create gdf from merged df and export to shapefile
+        combined_scores_gdf = gpd.GeoDataFrame(combined_scores_df, geometry = gpd.points_from_xy(combined_scores_df.EASTING, combined_scores_df.NORTHING), crs=crs_ref)
+        combined_scores_gdf.to_file(os.path.join(outpth, 'scores_only_Smw_Sew_Scs.shp'))
+
+    else:
+        print('combine_all_scores_only function NOT selected to run...')
+
+# combine scores with details for Smw, Sew, Scs
+def combine_all_scores_detailed(flag, gis_d, fig_d, ptrk_calc_d):
+    if flag:
+        print('combine_all_scores_detailed function selected to run...')
+
+        # load in potential wells shapefile as geopandas gdf & store crs for reference
+        potential_wells_gdf = gpd.read_file(os.path.join('gis','shp','data_gap_wells', 'potential_wells.shp'))
+        crs_ref = potential_wells_gdf.crs
+
+        potential_wells_df = potential_wells_gdf.drop(columns='geometry')
+        potential_wells_df['row_col_id'] = 10000000+(10000*potential_wells_df['row'])+potential_wells_df['col']
+
+        # load in individual scoring shapefiles as gdfs
+        mw_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_monitoring_well_proximity_uu_mu.shp'))
+        mw_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_monitoring_well_proximity_lu_cr.shp'))
+        ew_uumu_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_extraction_well_proximity_uu_mu.shp'))
+        ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'score_extraction_well_proximity_lu_cr.shp'))
+        cr_cs_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'chromium_continuous_source_scores.shp'))
+        tec99_cs_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'tec99_continuous_source_scores.shp'))
+        ctet_cs_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'ctet_continuous_source_scores.shp'))
+
+        # store only necessary information
+        mw_uumu_df = mw_uumu_gdf[['row_col_id', 'score_mw', 'Distance_m', 'Mw_Well_Na']]
+        ew_uumu_df = ew_uumu_gdf[['row_col_id', 'score_ext', 'Distance_m', 'Ext_Well_N']]
+        mw_lucr_df = mw_lucr_gdf[['row_col_id', 'score_mw', 'Distance_m', 'Mw_Well_Na']]
+        ew_lucr_df = ew_lucr_gdf[['row_col_id', 'score_ext', 'Distance_m', 'Ext_Well_N']]
+        cr_cs_df = cr_cs_gdf[['row_col_id', 'final_scor', 'nearest_di', 'dist_cl_m', 'comb_dist_', 'poly_count', 'raw_score']]
+        tec99_cs_df = tec99_cs_gdf[['row_col_id', 'final_scor', 'nearest_di', 'dist_cl_m', 'comb_dist_', 'poly_count', 'raw_score']]
+        ctet_cs_df = ctet_cs_gdf[['row_col_id', 'final_scor', 'nearest_di', 'dist_cl_m', 'comb_dist_', 'poly_count', 'raw_score']]
+
+        # fill nan vals with zeros
+        cr_cs_df['final_scor'] = cr_cs_df['final_scor'].fillna(0).astype(int)
+        tec99_cs_df['final_scor'] = tec99_cs_df['final_scor'].fillna(0).astype(int)
+        ctet_cs_df['final_scor'] = ctet_cs_df['final_scor'].fillna(0).astype(int)
+
+        # add in score detail in column name
+        mw_uumu_df.rename(columns={'score_mw': 's_mw_uumu'}, inplace=True)
+        mw_uumu_df.rename(columns={'Distance_m': 'dist_m_mw_uumu'}, inplace=True)
+        mw_uumu_df.rename(columns={'Mw_Well_Na': 'mw_near_mw_uumu'}, inplace=True)
+
+        ew_uumu_df.rename(columns={'score_ext': 's_ext_uumu'}, inplace=True)
+        ew_uumu_df.rename(columns={'Distance_m': 'dist_m_ew_uumu'}, inplace=True)
+        ew_uumu_df.rename(columns={'Ext_Well_N': 'ew_near_ew_uumu'}, inplace=True)
+        
+        mw_lucr_df.rename(columns={'score_mw': 's_mw_lucr'}, inplace=True)
+        mw_lucr_df.rename(columns={'Distance_m': 'dist_m_mw_lucr'}, inplace=True)
+        mw_lucr_df.rename(columns={'Mw_Well_Na': 'mw_near_mw_lucr'}, inplace=True)
+        
+        ew_lucr_df.rename(columns={'score_ext': 's_ext_lucr'}, inplace=True)
+        ew_lucr_df.rename(columns={'Distance_m': 'dist_m_ew_lucr'}, inplace=True)
+        ew_lucr_df.rename(columns={'Ext_Well_N': 'ew_near_ew_lucr'}, inplace=True)
+        
+        cr_cs_df.rename(columns={'final_scor': 's_cr_cs'}, inplace=True)
+        cr_cs_df.rename(columns={'nearest_di': 'neardist_m_cr_cs'}, inplace=True)
+        cr_cs_df.rename(columns={'dist_cl_m': 'cl_dist_m_cr_cs'}, inplace=True)
+        cr_cs_df.rename(columns={'comb_dist_': 'combdist_m_cr_cs'}, inplace=True)
+        cr_cs_df.rename(columns={'poly_count': 'plycnt_cr_cs'}, inplace=True)
+        cr_cs_df.rename(columns={'raw_score': 'raw_s_cr_cs'}, inplace=True)
+
+        tec99_cs_df.rename(columns={'final_scor': 's_tec_cs'}, inplace=True)
+        tec99_cs_df.rename(columns={'nearest_di': 'neardist_m_tec_cs'}, inplace=True)
+        tec99_cs_df.rename(columns={'dist_cl_m': 'cl_dist_m_tec_cs'}, inplace=True)
+        tec99_cs_df.rename(columns={'comb_dist_': 'combdist_m_tec_cs'}, inplace=True)
+        tec99_cs_df.rename(columns={'poly_count': 'plycnt_tec_cs'}, inplace=True)
+        tec99_cs_df.rename(columns={'raw_score': 'raw_s_tec_cs'}, inplace=True)
+        
+        ctet_cs_df.rename(columns={'final_scor': 's_ctet_cs'}, inplace=True)
+        ctet_cs_df.rename(columns={'nearest_di': 'neardist_m_ctet_cs'}, inplace=True)
+        ctet_cs_df.rename(columns={'dist_cl_m': 'cl_dist_m_ctet_cs'}, inplace=True)
+        ctet_cs_df.rename(columns={'comb_dist_': 'combdist_m_ctet_cs'}, inplace=True)
+        ctet_cs_df.rename(columns={'poly_count': 'plycnt_ctet_cs'}, inplace=True)
+        ctet_cs_df.rename(columns={'raw_score': 'raw_s_ctet_cs'}, inplace=True)
+
+        # fillna with zeros where appropriate
+        cr_cs_df['neardist_m_cr_cs'] = cr_cs_df['neardist_m_cr_cs'].fillna(0)
+        cr_cs_df['cl_dist_m_cr_cs'] = cr_cs_df['cl_dist_m_cr_cs'].fillna(0)
+        cr_cs_df['combdist_m_cr_cs'] = cr_cs_df['combdist_m_cr_cs'].fillna(0)
+        cr_cs_df['plycnt_cr_cs'] = cr_cs_df['plycnt_cr_cs'].fillna(0)
+        cr_cs_df['raw_s_cr_cs'] = cr_cs_df['raw_s_cr_cs'].fillna(0)
+
+        tec99_cs_df['neardist_m_tec_cs'] = tec99_cs_df['neardist_m_tec_cs'].fillna(0)
+        tec99_cs_df['cl_dist_m_tec_cs'] = tec99_cs_df['cl_dist_m_tec_cs'].fillna(0)
+        tec99_cs_df['combdist_m_tec_cs'] = tec99_cs_df['combdist_m_tec_cs'].fillna(0)
+        tec99_cs_df['plycnt_tec_cs'] = tec99_cs_df['plycnt_tec_cs'].fillna(0)
+        tec99_cs_df['raw_s_tec_cs'] = tec99_cs_df['raw_s_tec_cs'].fillna(0)
+
+        # merge into one df
+        dfs_to_merge = [potential_wells_df, mw_uumu_df, ew_uumu_df, mw_lucr_df, ew_lucr_df, cr_cs_df, tec99_cs_df, ctet_cs_df]
+
+        combined_scores_df = reduce(lambda left, right: pd.merge(left, right, on='row_col_id', how='outer'), dfs_to_merge)
+        
+        outpth = os.path.join('scores_combined')
+        if not os.path.exists(outpth):
+            os.makedirs(outpth)
+
+        combined_scores_df['NORTHING'] = combined_scores_df['y'] # meters
+        combined_scores_df['EASTING'] = combined_scores_df['x'] # meters
+
+        combined_scores_df.to_csv(os.path.join(outpth, 'scores_detailed_Smw_Sew_Scs.csv'))
+
+        # create gdf from merged df and export to shapefile
+        combined_scores_gdf = gpd.GeoDataFrame(combined_scores_df, geometry = gpd.points_from_xy(combined_scores_df.EASTING, combined_scores_df.NORTHING), crs=crs_ref)
+        combined_scores_gdf.to_file(os.path.join(outpth, 'scores_detailed_Smw_Sew_Scs.shp'))
+
+    else:
+        print('combine_all_scores_detailed function NOT selected to run...')
+
 # this main function contains all of the calculations, processing, plotting, scoring outputs
 def main():
     if flag_new_ecf == True:
 
         ################################################################################################################
         ################################################################################################################
-        ################################## ECF-200ZP1-25-XXXX Calculations Starting Here ###############################
+        ################################## ECF-200ZP1-25-0092 Calculations Starting Here ###############################
         ################################################################################################################
         ################################################################################################################
         print('starting ecf calculations...')
@@ -2769,9 +3105,18 @@ def main():
         # run these functions if bounding and centerline shapefiles do not exists
         source_area_list = ['Chromium_Source_North', 'Chromium_Source_South', 'Technetium_Source_North', 'Technetium_Source_South']
         for source_area in source_area_list:
-            generate_bounding_polygon(flag_generate_bounding_polygon, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
-            generate_centerline(flag_generate_centerline, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
-        
+            if flag_generate_bounding_and_centerline:
+                
+                print(f'creating final bounding polygon from scratch for {source_area}...')
+                generate_bounding_polygon(flag_generate_bounding_polygon, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
+                
+                print(f'creating final centerline from scratch for {source_area}...')
+                generate_centerline(flag_generate_centerline, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
+            
+            else:
+                print(f'NOT creating final bounding polygon from scratch for {source_area}...')
+                print(f'NOT creating final centerline from scratch for {source_area}...')
+            
         # now discretize each center line into points & determine which potential well cells are in bounding areas
         for source_area in source_area_list:
             centerline_to_points(flag_centerline_to_points, gis_d, fig_d, ptrk_calc_d, source_area)
@@ -2798,6 +3143,10 @@ def main():
         
         # calculate scores for ctet only (all zeros)
         calculate_continuous_source_score_ctet(flag_calculate_continuous_source_score_ctet, gis_d, fig_d, ptrk_calc_d)
+
+        # combine calculated scores into csvs and shapefiles for Smw, Sew, Scs
+        combine_all_scores_only(flag_combine_all_scores_only, gis_d, fig_d, ptrk_calc_d)             
+        combine_all_scores_detailed(flag_combine_all_scores_detailed, gis_d, fig_d, ptrk_calc_d)
         
     else:
         print('ecf calculations workflows NOT selected to run, \n check booleans...')
