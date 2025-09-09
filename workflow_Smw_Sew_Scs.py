@@ -94,10 +94,10 @@ flag_new_ecf = False
 # FIRST CODE BLOCK TO RUN. Can be run in series, turn off after successfuly completion.
 ################################################################################################
 # Smw calc - scoring for distance/proximity calcs monitoring wells
-flag_proximal_distance_to_mws = True
+flag_proximal_distance_to_mws = False
 
 # Sew, calc - scoring distance/proximity calcs extraction wells 
-flag_proximal_distance_to_ews = True
+flag_proximal_distance_to_ews = False
 ################################################################################################
 
 ################################################################################################
@@ -142,8 +142,8 @@ flag_parse_source_zones = False
 flag_generate_bounding_and_centerline = False # Turn this boolean on, if new bounding and centerline generation is desired, otherwise will keep existing shapefiles.
 
 if flag_generate_bounding_and_centerline:
-    flag_generate_bounding_polygon = True # don't edit this, boolean above will provide direction
-    flag_generate_centerline = True # don't edit this, boolean above will provide direction
+    flag_generate_bounding_polygon = False # don't edit this, boolean above will provide direction
+    flag_generate_centerline = False # don't edit this, boolean above will provide direction
 else:
     flag_generate_bounding_polygon = False # don't edit this, boolean above will provide direction
     flag_generate_centerline = False # don't edit this, boolean above will provide direction
@@ -171,9 +171,9 @@ flag_generate_continuous_source_score_map_tec99 = False
 flag_calculate_continuous_source_score_ctet = False
 
 # combine scores with details for Smw, Sew, Scs
-flag_combine_all_scores_detailed = True
+flag_combine_all_scores_detailed = False
 # combine scores only for Smw, Sew, Scs
-flag_combine_all_scores_only = True
+flag_combine_all_scores_only = False
 ################################################################################################
 
 # define helper functions for the workflow calculations
