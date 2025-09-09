@@ -1,0 +1,348 @@
+NAME,CP_scripts,TYPE_scripts,HSU_scripts,ANALYTE_scripts,Zone_SGW-38815,HSU_Assignment_ECF-200ZP1-22-0098,Final_Assignment,Determination_Based_On
+299-W10-1,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Tritium,U,UU/MU,UU/MU,SGW-38815
+299-W10-14,R,MONITORING,5_rlm,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,LU,UU/MU,LU/CR,SGW-38815
+299-W10-20,R,MONITORING,6_rwie,Iodine-129; Technetium-99; Tritium; Uranium,,,UU/MU,scripts
+299-W10-200,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,manual
+299-W10-201,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W10-201,PD,MONITORING,6_rwie,Iodine-129; Technetium-99; Tritium,,,UU/MU,scripts
+299-W10-201,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W10-202,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W10-202,PD,MONITORING,6_rwie,Iodine-129; Technetium-99; Tritium,,,UU/MU,scripts
+299-W10-202,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W10-203,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W10-203,PD,MONITORING,6_rwie,Iodine-129; Technetium-99; Tritium,,,UU/MU,scripts
+299-W10-203,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W10-204,C,CHARACTERIZATION,5_rlm,Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,,UU/MU,manual
+299-W10-204,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,manual
+299-W10-204,S,MONITORING,5_rlm,Iodine-129; Technetium-99; Tritium,,,UU/MU,manual
+299-W10-205,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+299-W10-205,PD,MONITORING,5_rlm,Hexavalent Chromium; Iodine-129; Technetium-99; Tritium,,,UU/MU,manual
+299-W10-205,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,manual
+299-W10-23,R,MONITORING,5_rlm,Technetium-99; Tritium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-24,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-26,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-27,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-28,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-29,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-30,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-31,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W10-33,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium,U,LU/CR,UU/MU,SGW-38815
+299-W11-100,C,CHARACTERIZATION,4_rwia,Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,scripts
+299-W11-100,PD,MONITORING,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,scripts
+299-W11-103,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,,decommissioned
+299-W11-104,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,,decommissioned
+299-W11-106,C,CHARACTERIZATION,5_rlm,Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+299-W11-106,PD,EXTRACTION,5_rlm,Carbon tetrachloride; Nitrate,,,UU/MU,manual
+299-W11-107,C,CHARACTERIZATION,0_bslt,Chromium; Hexavalent Chromium; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,scripts
+299-W11-107,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,scripts
+299-W11-116,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+299-W11-18,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+299-W11-33Q,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W11-39,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W11-40,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W11-41,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W11-42,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W11-43,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,LU,LU/CR,LU/CR,SGW-38815
+299-W11-45,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W11-46,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W11-47,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W11-48,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium,LU,UU/MU,LU/CR,SGW-38815
+299-W11-49,C,CHARACTERIZATION,5_rlm,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W11-49,R,EXTRACTION,5_rlm,Chromium; Tritium,U,UU/MU,UU/MU,SGW-38815
+299-W11-50,C,CHARACTERIZATION,5_rlm,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W11-50,R,EXTRACTION,5_rlm,Technetium-99,U,UU/MU,UU/MU,SGW-38815
+299-W11-87,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Tritium,LU,UU/MU,LU/CR,SGW-38815
+299-W11-88,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,LU,LU/CR,LU/CR,SGW-38815
+299-W11-90,C,CHARACTERIZATION,5_rlm,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W11-90,R,EXTRACTION,5_rlm,Chromium; Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W11-92,C,CHARACTERIZATION,5_rlm,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W11-92,R,EXTRACTION,5_rlm,Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W11-96,C,CHARACTERIZATION,4_rwia,Hexavalent Chromium; Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W11-96,R,EXTRACTION,4_rwia,Chromium; Tritium,U,UU/MU,UU/MU,SGW-38815
+299-W11-97,C,CHARACTERIZATION,5_rlm,Hexavalent Chromium,U,,UU/MU,SGW-38815
+299-W11-98,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W11-98,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene,,,LU/CR,manual
+299-W11-99,C,CHARACTERIZATION,5_rlm,Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W11-99,PD,MONITORING,5_rlm,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W12-2,R,EXTRACTION,5_rlm,Chromium; Technetium-99; Tritium,U,UU/MU,UU/MU,SGW-38815
+299-W12-3,R,EXTRACTION,4_rwia,Technetium-99; Tritium,U,UU/MU,UU/MU,SGW-38815
+299-W12-4,R,EXTRACTION,4_rwia,Chromium; Technetium-99,U,UU/MU,UU/MU,SGW-38815
+299-W12-5,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+299-W12-6,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W12-6,PD,EXTRACTION,5_rlm,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W13-1,R,MONITORING,5_rlm,Carbon tetrachloride; Nitrate; Trichloroethene,MU,UU/MU,UU/MU,SGW-38815
+299-W13-2P,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W13-2Q,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W13-3,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W13-3,PD,MONITORING,0_bslt,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W13-5,C,CHARACTERIZATION,4_rwia,Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W13-5,PD,EXTRACTION,5_rlm,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W14-11,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W14-14,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W14-15,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W14-16,R,MONITORING,5_rlm,Chromium; Hexavalent Chromium; Technetium-99,TU,UU/MU,UU/MU,SGW-38815
+299-W14-17,R,MONITORING,5_rlm,Carbon tetrachloride; Nitrate; Technetium-99,TU,UU/MU,UU/MU,SGW-38815
+299-W14-18,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W14-19,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W14-20,C,CHARACTERIZATION,5_rlm,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W14-20,R,EXTRACTION,5_rlm,Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W14-21,C,CHARACTERIZATION,4_rwia,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W14-21,R,EXTRACTION,4_rwia,Chromium; Technetium-99; Tritium,U,UU/MU,UU/MU,SGW-38815
+299-W14-22,R,EXTRACTION,5_rlm,Technetium-99,U,LU/CR,UU/MU,SGW-38815
+299-W14-24,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W14-24,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene,,,LU/CR,scripts
+299-W14-25,C,CHARACTERIZATION,6_rwie,Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W14-25,PD,MONITORING,6_rwie,Carbon tetrachloride; Nitrate,,,UU/MU,scripts
+299-W14-27,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,,decommissioned
+299-W14-28,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+299-W14-28,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,UU/MU,manual
+299-W14-29,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W14-29,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W14-30,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W14-30,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W14-31,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W14-31,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W14-32,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W14-32,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W14-33,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,,decommissioned
+299-W14-71,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene,LU,UU/MU,LU/CR,SGW-38815
+299-W14-72,R,MONITORING,5_rlm,Carbon tetrachloride; Nitrate; Trichloroethene,LU,UU/MU,LU/CR,SGW-38815
+299-W14-73,CNF,CHARACTERIZATION,5_rlm,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W14-73,R,EXTRACTION,5_rlm,Chromium; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W14-74,C,CHARACTERIZATION,4_rwia,Hexavalent Chromium; Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W14-74,R,EXTRACTION,4_rwia,Chromium; Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W14-75,C,CHARACTERIZATION,5_rlm,Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+299-W14-75,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,manual
+299-W15-11,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene,U,UU/MU,UU/MU,SGW-38815
+299-W15-15,R,MONITORING,6_rwie,Iodine-129; Technetium-99; Tritium; Uranium,,,UU/MU,scripts
+299-W15-152,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W15-17,R,MONITORING,6_rwie,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,Site-CR,UU/MU,LU/CR,manual
+299-W15-224,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W15-225,C,CHARACTERIZATION,6_rwie,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W15-225,R,EXTRACTION,6_rwie,Chromium; Nitrate; Tritium,U,UU/MU,UU/MU,SGW-38815
+299-W15-231,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W15-232,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W15-232,PD,MONITORING,6_rwie,Hexavalent Chromium; Iodine-129; Technetium-99; Tritium,,,UU/MU,scripts
+299-W15-232,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W15-30,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W15-33,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W15-37,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W15-40,R,MONITORING,6_rwie,Chromium; Nitrate; Technetium-99; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W15-44,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W15-46,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Technetium-99,UU,UU/MU,UU/MU,SGW-38815
+299-W15-49,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate,UU,UU/MU,UU/MU,SGW-38815
+299-W15-50,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Trichloroethene,MU,UU/MU,UU/MU,SGW-38815
+299-W15-7,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Trichloroethene,TU,UU/MU,UU/MU,SGW-38815
+299-W15-763,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W15-765,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W15-83,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W15-94,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W17-1,R,MONITORING,,Iodine-129; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W17-2,C,CHARACTERIZATION,6_rwie,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W17-2,CNF,CHARACTERIZATION,6_rwie,Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W17-2,R,EXTRACTION,6_rwie,Chromium; Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W17-3,C,CHARACTERIZATION,6_rwie,Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+299-W17-3,R,EXTRACTION,6_rwie,Chromium; Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W18-1,R,MONITORING,6_rwie,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W18-15,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W18-16,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene,TU,UU/MU,UU/MU,SGW-38815
+299-W18-21,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W18-22,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,LU,UU/MU,LU/CR,SGW-38815
+299-W18-260,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W18-261,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W18-263,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W18-40,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W18-45,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W18-45,CNF,CHARACTERIZATION,6_rwie,Nitrate,,,UU/MU,scripts
+299-W18-45,PD,MONITORING,6_rwie,Hexavalent Chromium; Iodine-129; Technetium-99; Tritium,,,UU/MU,scripts
+299-W18-45,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W18-46,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W18-46,PD,MONITORING,6_rwie,Hexavalent Chromium; Technetium-99; Tritium,,,UU/MU,scripts
+299-W18-46,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W18-47,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W18-47,PD,MONITORING,6_rwie,Hexavalent Chromium; Iodine-129; Technetium-99; Tritium,,,UU/MU,scripts
+299-W18-47,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W19-101,R,MONITORING,6_rwie,Chromium; Iodine-129; Nitrate; Technetium-99; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-105,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-107,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W19-113,R,EXTRACTION,6_rwie,Chromium; Iodine-129; Nitrate; Technetium-99; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W19-113,R,EXTRACTION,6_rwie,Chromium; Iodine-129; Nitrate; Technetium-99; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W19-114,C,CHARACTERIZATION,6_rwie,Hexavalent Chromium; Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W19-114,C,CHARACTERIZATION,6_rwie,Hexavalent Chromium; Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W19-114,R,EXTRACTION,6_rwie,Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W19-114,R,EXTRACTION,6_rwie,Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W19-115,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-116,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-123,R,EXTRACTION,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,Multiple,UU/MU,UU/MU,manual
+299-W19-125,C,CHARACTERIZATION,6_rwie,Hexavalent Chromium; Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W19-125,C,CHARACTERIZATION,6_rwie,Hexavalent Chromium; Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W19-126,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W19-127,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-127,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-128,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-128,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-131,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W19-132,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-132,CNF,CHARACTERIZATION,6_rwie,Iodine-129; Nitrate,,,UU/MU,scripts
+299-W19-132,PD,MONITORING,6_rwie,Carbon tetrachloride,,,UU/MU,scripts
+299-W19-132,R,MONITORING,6_rwie,Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,,UU/MU,scripts
+299-W19-134,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-134,PD,EXTRACTION,6_rwie,Carbon tetrachloride; Nitrate,,,UU/MU,scripts
+299-W19-135,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-135,PD,MONITORING,6_rwie,Carbon tetrachloride,,,UU/MU,scripts
+299-W19-135,R,MONITORING,6_rwie,Iodine-129; Nitrate; Technetium-99; Uranium,,,UU/MU,scripts
+299-W19-136,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W19-136,PD,MONITORING,6_rwie,Carbon tetrachloride,,,UU/MU,scripts
+299-W19-136,R,MONITORING,6_rwie,Iodine-129; Nitrate; Technetium-99; Uranium,,,UU/MU,scripts
+299-W19-34A,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,MU,UU/MU,UU/MU,SGW-38815
+299-W19-34B,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,MU,UU/MU,UU/MU,SGW-38815
+299-W19-36,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W19-39,R,MONITORING,6_rwie,Chromium; Iodine-129; Nitrate; Tritium; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W19-4,R,MONITORING,5_rlm,Carbon tetrachloride; Nitrate; Trichloroethene,U,UU/MU,UU/MU,SGW-38815
+299-W19-41,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-42,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-43,R,MONITORING,6_rwie,Chromium; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-44,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-45,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-46,R,MONITORING,6_rwie,Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-47,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-48,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W19-49,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W19-6,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,MU,UU/MU,UU/MU,SGW-38815
+299-W20-1,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W21-2,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W21-3,R,MONITORING,6_rwie,Chromium; Iodine-129; Nitrate; Tritium,MU,UU/MU,UU/MU,SGW-38815
+299-W22-113,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-114,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-115,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-116,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-123,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W22-123,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,,UU/MU,scripts
+299-W22-125,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W22-125,PD,MONITORING,6_rwie,Carbon tetrachloride,,,UU/MU,scripts
+299-W22-125,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,,UU/MU,scripts
+299-W22-47,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,UU,UU/MU,UU/MU,SGW-38815
+299-W22-69,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-72,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-79,R,MONITORING,6_rwie,Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-80,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-81,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-82,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Tritium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-83,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-84,PE,MONITORING,,Technetium-99,TU,UU/MU,UU/MU,SGW-38815
+299-W22-84,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-85,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-86,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-87,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-88,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-89,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Tritium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-90,R,EXTRACTION,6_rwie,Chromium; Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W22-90,R,EXTRACTION,6_rwie,Chromium; Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W22-91,R,EXTRACTION,6_rwie,Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W22-91,R,EXTRACTION,6_rwie,Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W22-92,R,EXTRACTION,6_rwie,Technetium-99,U,UU/MU,UU/MU,SGW-38815
+299-W22-92,R,EXTRACTION,6_rwie,Technetium-99,U,UU/MU,UU/MU,SGW-38815
+299-W22-93,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-93,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-94,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-95,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W22-96,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W23-19,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W23-20,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W23-21,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W23-236,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Tritium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W23-4,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+299-W26-13,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W26-14,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Uranium,TU,UU/MU,UU/MU,SGW-38815
+299-W26-15,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,,UU/MU,scripts
+299-W26-15,PD,MONITORING,6_rwie,Iodine-129; Technetium-99; Tritium,,,UU/MU,scripts
+299-W26-15,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W26-16,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W27-2,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Trichloroethene,LU,UU/MU,LU/CR,SGW-38815
+299-W27-3,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+299-W5-1,R,EXTRACTION,4_rwia,Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W5-2Q,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium,,LU/CR,LU/CR,ECF-200ZP1-22-0098
+299-W6-15,C,CHARACTERIZATION,4_rwia,Hexavalent Chromium; Nitrate,U,UU/MU,UU/MU,SGW-38815
+299-W6-15,R,EXTRACTION,4_rwia,Chromium; Nitrate; Technetium-99; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+299-W6-17,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,LU/CR,LU/CR,ECF-200ZP1-22-0098
+299-W6-3,R,MONITORING,4_rwia,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene,LU,UU/MU,LU/CR,SGW-38815
+299-W6-6,R,MONITORING,4_rwia,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene; Tritium,LU,LU/CR,LU/CR,SGW-38815
+299-W7-15,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+299-W7-15,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+299-W7-16,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W7-16,PD,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,scripts
+299-W7-3,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,LU,LU/CR,LU/CR,SGW-38815
+299-W7-4,R,MONITORING,5_rlm,Iodine-129; Technetium-99; Tritium; Uranium,TU,,UU/MU,SGW-38815
+299-W9-2,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-19-88,R,MONITORING,,Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-25-70,R,MONITORING,,Chromium; Hexavalent Chromium,TU,UU/MU,UU/MU,SGW-38815
+699-26-89,R,MONITORING,,Nitrate,UU,UU/MU,UU/MU,SGW-38815
+699-27-68,R,MONITORING,,Chromium; Hexavalent Chromium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-29-66,R,MONITORING,,Chromium; Hexavalent Chromium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-30-63,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+699-30-66,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Trichloroethene,LU,UU/MU,LU/CR,SGW-38815
+699-30-70,R,MONITORING,,Chromium; Hexavalent Chromium; Tritium,U,UU/MU,UU/MU,SGW-38815
+699-30-73,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-31-68,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-32-59,R,MONITORING,,Chromium; Hexavalent Chromium,U,UU/MU,UU/MU,SGW-38815
+699-32-62,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-32-64,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Tritium,U,UU/MU,UU/MU,SGW-38815
+699-32-70B,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-32-72A,R,MONITORING,5_rlm,Carbon tetrachloride; Iodine-129; Trichloroethene; Tritium,U,UU/MU,UU/MU,SGW-38815
+699-32-76,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-32-77B,C,CHARACTERIZATION,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,,UU/MU,scripts
+699-32-77B,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Nitrate; Trichloroethene; Uranium,,,UU/MU,scripts
+699-33-74,R,MONITORING,6_rwie,Chromium; Iodine-129; Technetium-99; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-33-75,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-33-76,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-34-61,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-34-72,R,MONITORING,6_rwie,Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-35-66A,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-35-70C,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,,UU/MU,manual
+699-35-78A,R,MONITORING,6_rwie,Carbon tetrachloride; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-36-61A,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-36-63B,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Trichloroethene; Tritium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-36-65,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-36-66B,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,,decommissioned
+699-36-70A,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-36-70B,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-37-66,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-37-67,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-38-61,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-38-64B,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Trichloroethene; Tritium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-38-65,R,MONITORING,6_rwie,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-38-70B,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,MU,UU/MU,UU/MU,SGW-38815
+699-38-70C,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,LU,UU/MU,LU/CR,SGW-38815
+699-39-68,R,MONITORING,5_rlm,Carbon tetrachloride; Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,U,UU/MU,UU/MU,SGW-38815
+699-40-62,R,MONITORING,5_rlm,Carbon tetrachloride; Nitrate; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-40-65,R,MONITORING,6_rwie,Carbon tetrachloride; Chromium; Nitrate; Technetium-99; Trichloroethene,TU,UU/MU,UU/MU,SGW-38815
+699-40-70A,C,CHARACTERIZATION,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,scripts
+699-40-70A,PD,EXTRACTION,4_rwia,Carbon tetrachloride; Nitrate,,,LU/CR,scripts
+699-43-69,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-44-64,R,MONITORING,4_rwia,Carbon tetrachloride; Nitrate; Technetium-99; Trichloroethene,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-44-70B,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,LU/CR,LU/CR,ECF-200ZP1-22-0098
+699-44-70C,C,CHARACTERIZATION,5_rlm,Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,UU/MU,manual
+699-44-70C,PD,MONITORING,5_rlm,Carbon tetrachloride; Nitrate,,,UU/MU,manual
+699-45-65,C,CHARACTERIZATION,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,scripts
+699-45-65,PD,MONITORING,0_bslt,Carbon tetrachloride; Nitrate,,,LU/CR,scripts
+699-45-67C,C,CHARACTERIZATION,5_rlm,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,manual
+699-45-67C,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene,,,LU/CR,manual
+699-45-69C,R,MONITORING,4_rwia,Carbon tetrachloride; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,Site-CR,LU/CR,LU/CR,manual
+699-46-61,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-46-61,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-46-61B,C,CHARACTERIZATION,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,scripts
+699-46-61B,PD,MONITORING,0_bslt,Nitrate,,,LU/CR,scripts
+699-46-70,C,CHARACTERIZATION,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium; Uranium,,,LU/CR,scripts
+699-46-70,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene,,,LU/CR,scripts
+699-47-60,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-47-60,R,MONITORING,0_bslt,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-48-71,R,MONITORING,4_rwia,Carbon tetrachloride; Chromium; Hexavalent Chromium; Iodine-129; Nitrate; Technetium-99; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-48-77C,R,MONITORING,5_rlm,Carbon tetrachloride; Nitrate; Tritium,MU,UU/MU,UU/MU,SGW-38815
+699-48-96,R,MONITORING,,Nitrate; Technetium-99; Tritium; Uranium,U,LU/CR,UU/MU,SGW-38815
+699-49-100C,R,MONITORING,,Nitrate; Technetium-99; Tritium; Uranium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-49-79,R,MONITORING,6_rwie,Carbon tetrachloride; Nitrate; Technetium-99; Tritium; Uranium,TU,UU/MU,UU/MU,SGW-38815
+699-50-74,R,MONITORING,4_rwia,Carbon tetrachloride; Nitrate; Trichloroethene; Tritium,TU,UU/MU,UU/MU,SGW-38815
+699-51-63,R,MONITORING,,Carbon tetrachloride; Nitrate; Trichloroethene,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-51-75,R,MONITORING,0_bslt,Technetium-99; Tritium,,UU/MU,UU/MU,ECF-200ZP1-22-0098
+699-51-75P,R,MONITORING,0_bslt,Tritium,,LU/CR,LU/CR,ECF-200ZP1-22-0098
+699-55-76,R,MONITORING,,Technetium-99; Tritium,UU,UU/MU,UU/MU,SGW-38815
