@@ -142,8 +142,8 @@ flag_parse_source_zones = False
 flag_generate_bounding_and_centerline = False # Turn this boolean on, if new bounding and centerline generation is desired, otherwise will keep existing shapefiles.
 
 if flag_generate_bounding_and_centerline:
-    flag_generate_bounding_polygon = False # don't edit this, boolean above will provide direction
-    flag_generate_centerline = False # don't edit this, boolean above will provide direction
+    flag_generate_bounding_polygon = True # don't edit this, boolean above will provide direction
+    flag_generate_centerline = True # don't edit this, boolean above will provide direction
 else:
     flag_generate_bounding_polygon = False # don't edit this, boolean above will provide direction
     flag_generate_centerline = False # don't edit this, boolean above will provide direction
@@ -354,8 +354,8 @@ def calc_proximal_distance_to_mws(flag, gis_d, fig_d, data_gap_wells_flag=[]):
             plt.show()
             plt.close()
 
-        else:
-            print('calc_proximal_distance_to_mws function selected to NOT run...')
+    else:
+        print('calc_proximal_distance_to_mws function selected to NOT run...')
 
 # this function calculates the proximal distance to nearest extraction well for each potential well cell
 def calc_proximal_distance_to_ews(flag, gis_d, fig_d, data_gap_wells_flag=[]):
