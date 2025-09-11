@@ -1,0 +1,37 @@
+column name,shortened name,Figure Number
+ctet_uu_mu_mik_cv_score,ct_u_cv_s,Figure 5-50 - Plume Mass Data Gap Score for CTET in UU/MU
+ctet_uu_mu_mik_cov_score,ct_u_cov_s,Figure 5-54 - Plume Extents Data Gap Score for CTET in UU/MU
+ctet_uu_mu_mik_cv,ct_u_cv,Figure 5-48 - MIK-CV Distribution for CTET in UU/MU
+ctet_uu_mu_mik_cov,ct_u_cov,Figure 5-52 - MIK-COV Distribution for CTET in UU/MU
+ctet_lu_cr_mik_cv_score,ct_l_cv_s,Figure 5-51 - Plume Mass Data Gap Score for CTET in LU/CR
+ctet_lu_cr_mik_cov_score,ct_l_cov_s,Figure 5-55 - Plume Extents Data Gap Score for CTET in LU/CR
+ctet_lu_cr_mik_cv,ct_l_cv,Figure 5-49 - MIK-CV Distribution for CTET in LU/CR
+ctet_lu_cr_mik_cov,ct_l_cov,Figure 5-53 - MIK-COV Distribution for CTET in LU/CR
+hexcr_uu_mu_mik_cv_score,hc_u_cv_s,Figure 5-62 - Plume Mass Data Gap Scores for Hexavalent Chromium in UU/MU
+hexcr_uu_mu_mik_cov_score,hc_u_cov_s,Figure 5-66 - Plume Exents Data Gap Scores for Hexavalent Chrmoium in UU/MU
+hexcr_uu_mu_mik_cv,hc_u_cv,Figure 5-60 - MIK-CV Distribution for Hexavalent Chromium in UU/MU
+hexcr_uu_mu_mik_cov,hc_u_cov,Figure 5-64 - MIK-COV Distribution for Hexavalent Chromium in UU/MU
+hexcr_lu_cr_mik_cv_score,hc_l_cv_s,Figure 5-63 - Plume Mass Data Gap Scores for Hexavalent Chromium in LU/CR
+hexcr_lu_cr_mik_cov_score,hc_l_cov_s,Figure 5-67 - Plume Extents Data Gap Scores for Hexavalent Chromium in LU/CR
+hexcr_lu_cr_mik_cv,hc_l_cv,Figure 5-61 - MIK-CV Distribution for Hexavalent Chromium in LU/CR
+hexcr_lu_cr_mik_cov,hc_l_cov,Figure 5-65 - MIK-COV Distribution for Hexavalent Chromium in LU/CR
+tc99_uu_mu_mik_cv_score,tc_u_cv_s,Figure 5-78 - Plume Extents Data Gap Scores for Tc-99 in UU/MU
+tc99_uu_mu_mik_cov_score,tc_u_cov_s,Figure 5-74 - Plume Mass Data Gap Scores for Tc-99 in UU/MU
+tc99_uu_mu_mik_cv,tc_u_cv,Figure 5-72 - MIK-CV Distribution for Tc-99 in UU/MU
+tc99_uu_mu_mik_cov,tc_u_cov,Figure 5-76 - MIK-COV Distribution for Tc-99 in UU/MU
+tc99_lu_cr_mik_cv_score,tc_l_cv_s,Figure 5-75 - Plume Mass Data Gap Scores for Tc-99 in LU/CR
+tc99_lu_cr_mik_cov_score,tc_l_cov_s,Figure 5-79 - Plume Extents Data Gap Scores for Tc-99 in LU/CR
+tc99_lu_cr_mik_cv,tc_l_cv,Figure 5-73 - MIK-CV Distribution for Tc-99 in LU/CR
+tc99_lu_cr_mik_cov,tc_l_cov,Figure 5-77 - MIK-COV Distribution for Tc-99 in LU/CR
+ctet_uumu_tdg_s,ct_u_tdg_s,Figure 5-56 - Total Data Gap Score for CTET in UU/MU
+ctet_lucr_tdg_s,ct_l_tdg_s,Figure 5-57 - Total Data Gap Score for CTET in LU/CR
+hcr_uumu_tdg_s,hc_u_tdg_s,Figure 5-68 - Total Data Gap Score for Hexavalent Chrmoium in UU/MU
+hcr_lucr_tdg_s,hc_l_tdg_s,Figure 5-69 - Total Data Gap Score for Hexavalent Chromium in LU/CR
+tec_uumu_tdg_s,tc_u_tdg_s,Figure 5-80 - Total Data Gap Score for Tc-99 in UU/MU
+tec_lucr_tdg_s,tc_l_tdg_s,Figure 5-81 - Total Data Gap Score for Tc-99 in LU/CR
+hcr_uumu_persis_s,hc_u_p_s,Figure 5-58 - Contaminant Persitence Data Gap Scores for Hexavalent Chromium in UU/MU
+hcr_lucr_persis_s,hc_l_p_s,Figure 5-59 - Contaminant Persistence Data Gap Scores for Hexavalent Chromium in LU/CR
+tec_uumu_persis_s,tc_u_p_s,Figure 5-70 - Contaminant Persistence Data Gap Scores for Tc-99 in UU/MU
+tec_lucr_persis_s,tc_l_p_s,Figure 5-71 - Contaminant Persistence Data Gap Scores for Tc-99 in LU/CR
+ctet_uumu_persis_s,ct_u_p_s,Figure 5-46 - Contaminant Persistence Data Gap Scores for CTET in UU/MU
+ctet_lucr_persis_s,ct_l_p_s,Figure 5-47 - Contaminant Persistence Data Gap Scores for CTET in LU/CR

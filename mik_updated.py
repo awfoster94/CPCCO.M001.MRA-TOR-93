@@ -17,6 +17,8 @@ import shapely.geometry as sgeom
 from matplotlib.ticker import MaxNLocator
 import matplotlib.cm as cm
 from skgstat import models as skg_models
+import zlib
+import re
 # ──────────────────────────────────────────────────────────────────────────────
 # Paths
 # ──────────────────────────────────────────────────────────────────────────────
@@ -29,8 +31,8 @@ grid_path = os.path.join(gis_path, "shp", "model_grid", "grid_274.shp")
 rds_path = os.path.join(gis_path, "shp", "basemaps", "trvehrcl_buffer15m.shp")
 processed_root = os.path.join(data_path, "processed_data") 
 maps_root_default = os.path.join(processed_root, "maps")
-scores_only_csv = os.path.join("scores_combined", "scores_combined_only.csv")
-scores_detailed_csv = os.path.join("scores_combined", "scores_combined_detailed.csv")
+scores_only_csv = os.path.join("scores_combined", "scores_only_Smik_Scov_Sexcee.csv")
+scores_detailed_csv = os.path.join("scores_combined", "scores_detailed_Smik_Scov_Sexcee.csv")
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Functions
@@ -1716,6 +1718,27 @@ def _extract_rcl_cv_block(rcl_gdf, prefix):
 def _prefix(constituent, assignment):
     return f"{constituent.lower()}_{assignment.lower().replace('/','_')}"
 
+def _left_join_overwrite(base_df: pd.DataFrame, add_df: pd.DataFrame) -> pd.DataFrame:
+    """Left-join on ['row','col'], overwriting any same-named columns from base with add."""
+    if add_df is None or (hasattr(add_df, "empty") and add_df.empty):
+        return base_df
+
+    # ensure join keys are Int64 for both
+    for df in (base_df, add_df):
+        df["row"] = pd.to_numeric(df["row"], errors="coerce").astype("Int64")
+        df["col"] = pd.to_numeric(df["col"], errors="coerce").astype("Int64")
+
+    base_idx = base_df.set_index(["row", "col"])
+    add_idx  = add_df.set_index(["row", "col"])
+
+    # remove any columns in base that will be provided by add
+    overlap = [c for c in add_idx.columns if c in base_idx.columns]
+    if overlap:
+        base_idx = base_idx.drop(columns=overlap, errors="ignore")
+
+    # left join new columns
+    out_idx = base_idx.join(add_idx, how="left")
+    return out_idx.reset_index()
 
 def add_scores_to_csvs(
     scores_only_csv,
@@ -1802,14 +1825,136 @@ def add_scores_to_csvs(
         merge_block_detailed = block_detailed if merge_block_detailed is None else merge_block_detailed.merge(block_detailed, on=["row","col"], how="outer")
 
     # left-join into the base CSVs and overwrite existing columns if present
-    out_only = base_only.merge(merge_block_only, on=["row","col"], how="left", suffixes=("",""))
-    out_detailed = base_detailed.merge(merge_block_detailed, on=["row","col"], how="left", suffixes=("",""))
-
+    out_only     = _left_join_overwrite(base_only, merge_block_only)
+    out_detailed = _left_join_overwrite(base_detailed, merge_block_detailed)
     # save back (overwrite)
     out_only.to_csv(scores_only_csv, index=False)
     out_detailed.to_csv(scores_detailed_csv, index=False)
 
     print(f"Updated:\n  {scores_only_csv}\n  {scores_detailed_csv}")
+
+NAME_MAP = {
+    # Smik/Scov/Sexcee
+    "ctet_uu_mu_mik_cv_score": "ct_u_cv_s",
+    "ctet_uu_mu_mik_cov_score": "ct_u_cov_s",
+    "ctet_uu_mu_mik_cv": "ct_u_cv",
+    "ctet_uu_mu_mik_cov": "ct_u_cov",
+    "ctet_lu_cr_mik_cv_score": "ct_l_cv_s",
+    "ctet_lu_cr_mik_cov_score": "ct_l_cov_s",
+    "ctet_lu_cr_mik_cv": "ct_l_cv",
+    "ctet_lu_cr_mik_cov": "ct_l_cov",
+    "hexcr_uu_mu_mik_cv_score": "hc_u_cv_s",
+    "hexcr_uu_mu_mik_cov_score": "hc_u_cov_s",
+    "hexcr_uu_mu_mik_cv": "hc_u_cv",
+    "hexcr_uu_mu_mik_cov": "hc_u_cov",
+    "hexcr_lu_cr_mik_cv_score": "hc_l_cv_s",
+    "hexcr_lu_cr_mik_cov_score": "hc_l_cov_s",
+    "hexcr_lu_cr_mik_cv": "hc_l_cv",
+    "hexcr_lu_cr_mik_cov": "hc_l_cov",
+    "tc99_uu_mu_mik_cv_score": "tc_u_cv_s",
+    "tc99_uu_mu_mik_cov_score": "tc_u_cov_s",
+    "tc99_uu_mu_mik_cv": "tc_u_cv",
+    "tc99_uu_mu_mik_cov": "tc_u_cov",
+    "tc99_lu_cr_mik_cv_score": "tc_l_cv_s",
+    "tc99_lu_cr_mik_cov_score": "tc_l_cov_s",
+    "tc99_lu_cr_mik_cv": "tc_l_cv",
+    "tc99_lu_cr_mik_cov": "tc_l_cov",
+
+    # Smw/Sew/Scs/… extras
+    "ctet_uumu_tdg_s": "ct_u_tdg_s",
+    "ctet_lucr_tdg_s": "ct_l_tdg_s",
+    "hcr_uumu_tdg_s": "hc_u_tdg_s",
+    "hcr_lucr_tdg_s": "hc_l_tdg_s",
+    "tec_uumu_tdg_s": "tc_u_tdg_s",
+    "tec_lucr_tdg_s": "tc_l_tdg_s",
+    "hcr_uumu_persis_s": "hc_u_p_s",
+    "hcr_lucr_persis_s": "hc_l_p_s",
+    "tec_uumu_persis_s": "tc_u_p_s",
+    "tec_lucr_persis_s": "tc_l_p_s",
+    "ctet_uumu_persis_s": "ct_u_p_s",
+    "ctet_lucr_persis_s": "ct_l_p_s",
+}
+
+def export_scores_grid_shp_with_names(
+    grid_path: str,
+    csv_smik_scov_sexcee: str,
+    csv_smw_sew_scs_smik_scov_sexcee: str,
+    out_shp_path: str,
+):
+    # columns we’ll try to pull (will silently drop any not present)
+    cols_a = [
+        "ctet_uu_mu_mik_cv_score","ctet_uu_mu_mik_cov_score","ctet_uu_mu_mik_cv","ctet_uu_mu_mik_cov",
+        "ctet_lu_cr_mik_cv_score","ctet_lu_cr_mik_cov_score","ctet_lu_cr_mik_cv","ctet_lu_cr_mik_cov",
+        "hexcr_uu_mu_mik_cv_score","hexcr_uu_mu_mik_cov_score","hexcr_uu_mu_mik_cv","hexcr_uu_mu_mik_cov",
+        "hexcr_lu_cr_mik_cv_score","hexcr_lu_cr_mik_cov_score","hexcr_lu_cr_mik_cv","hexcr_lu_cr_mik_cov",
+        "tc99_uu_mu_mik_cv_score","tc99_uu_mu_mik_cov_score","tc99_uu_mu_mik_cv","tc99_uu_mu_mik_cov",
+        "tc99_lu_cr_mik_cv_score","tc99_lu_cr_mik_cov_score","tc99_lu_cr_mik_cv","tc99_lu_cr_mik_cov",
+    ]
+    cols_b = [
+        "ctet_uumu_tdg_s","ctet_lucr_tdg_s","hcr_uumu_tdg_s","hcr_lucr_tdg_s","tec_uumu_tdg_s","tec_lucr_tdg_s",
+        "hcr_uumu_persis_s","hcr_lucr_persis_s","tec_uumu_persis_s","tec_lucr_persis_s","ctet_uumu_persis_s","ctet_lucr_persis_s",
+    ]
+
+    def _coerce_rowcol(df):
+        df = df.copy()
+        df["row"] = pd.to_numeric(df["row"], errors="coerce").astype("Int64")
+        df["col"] = pd.to_numeric(df["col"], errors="coerce").astype("Int64")
+        return df
+
+    # read CSVs
+    a = pd.read_csv(csv_smik_scov_sexcee)
+    b = pd.read_csv(csv_smw_sew_scs_smik_scov_sexcee)
+    for name, df in (("CSV A", a), ("CSV B", b)):
+        if not {"row","col"}.issubset(df.columns):
+            raise ValueError(f"{name} missing 'row'/'col'.")
+
+    a = _coerce_rowcol(a[["row","col"] + [c for c in cols_a if c in a.columns]])
+    b = _coerce_rowcol(b[["row","col"] + [c for c in cols_b if c in b.columns]])
+
+    ab = pd.merge(a, b, on=["row","col"], how="outer")
+
+    # grid with row/col
+    grid = gpd.read_file(grid_path)
+    # find row/col columns
+    for r,c in (("row","col"), ("ROW","COL"), ("row","column"), ("ROW","COLUMN"), ("Row","Col"), ("Row","Column")):
+        if r in grid.columns and c in grid.columns:
+            grid = grid.rename(columns={r:"row", c:"col"})
+            break
+    else:
+        raise ValueError(f"Couldn’t find row/col in grid. Grid columns: {sorted(grid.columns)}")
+    grid = _coerce_rowcol(grid)
+
+    # inner join: keep grid cells present in CSVs
+    gdf = grid.merge(ab, on=["row","col"], how="inner")
+
+    # keep only row, col, requested columns
+    requested = [c for c in cols_a + cols_b if c in gdf.columns]
+    gdf = gdf[["row","col"] + requested + ["geometry"]].copy()
+
+    # apply your exact name replacements (only for columns that exist)
+    rename_map = {k: v for k, v in NAME_MAP.items() if k in gdf.columns}
+    # sanity checks for shapefile rules
+    if len(set(rename_map.values())) != len(rename_map.values()):
+        dups = pd.Series(list(rename_map.values())).value_counts()
+        dups = list(dups[dups > 1].index)
+        raise ValueError(f"Duplicate shortened names detected: {dups}")
+    too_long = [v for v in rename_map.values() if len(v) > 10]
+    if too_long:
+        raise ValueError(f"Shapefile name >10 chars: {too_long}")
+
+    gdf = gdf.rename(columns=rename_map)
+
+    # write shapefile + a mapping CSV for traceability
+    os.makedirs(os.path.dirname(out_shp_path), exist_ok=True)
+    gdf.to_file(out_shp_path)
+
+    map_csv = os.path.splitext(out_shp_path)[0] + "_field_map.csv"
+    pd.DataFrame(
+        [{"original": k, "shapefile_field": v} for k, v in rename_map.items()]
+    ).to_csv(map_csv, index=False)
+
+    print(f"Wrote: {out_shp_path}  (features={len(gdf)})")
+    print(f"Field map: {map_csv}")
     
 # ──────────────────────────────────────────────────────────────────────────────
 # CTET UU/MU
@@ -2124,10 +2269,21 @@ tc99_lucr_params = plot_variograms_before_kriging(
 )
 
 tc99_lucr_params_updated = {
-    'ind90': (2338.1352785423956, 0.18664110744741697, 0.10756277751949161),
-    'ind225': (3453.8016791704335, 0.1, 0.1),
-    'ind450': (3453.8016791704335, 0.1, 0.01)}
+    'ind51': (2500, 0.23, 0.01),
+    'ind90': (2500, 0.25, 0.01),
+    'ind225': (2000, 0.15, 0.05)}
 
+plot_variograms_with_final_params(
+    constituent="Tc99",
+    assignment="LU/CR",
+    thresholds=thresholds_tc99_lucr,
+    params_dict=tc99_lucr_params_updated,
+    model="spherical",
+    maxlag=3500,
+    n_lags=15,
+    include_characterization=False,
+    save_plots=True
+)
 
 # 2) Paste the printed dict (or reuse ctet_uumu_params) into run_mik_for:
 tc99_lucr = run_mik_for(
@@ -2260,11 +2416,11 @@ plot_mik_cov_score(tc99_lucr, title_prefix="Tc99 LU/CR —")
 # ──────────────────────────────────────────────────────────────────────────────
 
 bundles = [
-    {"constituent": "CTET", "assignment": "UU/MU", "res": ctet_uumu, "rcl": rcl_ctet_uumu},
-    {"constituent": "CTET", "assignment": "LU/CR", "res": ctet_lucr, "rcl": rcl_ctet_lucr},
-    {"constituent": "HexCr","assignment": "UU/MU", "res": hexcr_uumu, "rcl": rcl_hexcr_uumu},
-    {"constituent": "HexCr","assignment": "LU/CR", "res": hexcr_lucr, "rcl": rcl_hexcr_lucr},
-    {"constituent": "Tc99", "assignment": "UU/MU", "res": tc99_uumu, "rcl": rcl_tc99_uumu},
+    #{"constituent": "CTET", "assignment": "UU/MU", "res": ctet_uumu, "rcl": rcl_ctet_uumu},
+    #{"constituent": "CTET", "assignment": "LU/CR", "res": ctet_lucr, "rcl": rcl_ctet_lucr},
+    #{"constituent": "HexCr","assignment": "UU/MU", "res": hexcr_uumu, "rcl": rcl_hexcr_uumu},
+    #{"constituent": "HexCr","assignment": "LU/CR", "res": hexcr_lucr, "rcl": rcl_hexcr_lucr},
+    #{"constituent": "Tc99", "assignment": "UU/MU", "res": tc99_uumu, "rcl": rcl_tc99_uumu},
     {"constituent": "Tc99", "assignment": "LU/CR", "res": tc99_lucr, "rcl": rcl_tc99_lucr},
 ]
 
@@ -2273,4 +2429,11 @@ add_scores_to_csvs(
     scores_detailed_csv=scores_detailed_csv,
     grid_path=grid_path,
     bundles=bundles
+)
+
+export_scores_grid_shp_with_names(
+    grid_path=os.path.join(gis_path, "shp", "model_grid", "grid_274.shp"),
+    csv_smik_scov_sexcee=os.path.join("scores_combined", "scores_detailed_Smik_Scov_Sexcee.csv"),
+    csv_smw_sew_scs_smik_scov_sexcee=os.path.join("scores_combined", "scores_detailed_Smw_Sew_Scs_Smik_Scov_Sexcee.csv"),
+    out_shp_path=os.path.join("scores_combined", "grid_for_generating_figures.shp"),
 )
