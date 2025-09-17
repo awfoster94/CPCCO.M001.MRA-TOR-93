@@ -1,0 +1,16 @@
+name: mik-hanford-env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - pandas
+  - matplotlib
+  - scipy
+  - geopandas
+  - shapely
+  - pyproj
+  - scikit-gstat
+  - pykrige
+  - ipykernel
+  - flopy
