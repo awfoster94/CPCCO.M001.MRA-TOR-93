@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created September 2025
+Created September 2025 
 
 @author: afoster
 """
@@ -16,6 +16,7 @@ Created September 2025
 #### For each potential well location, the existing extraction and       ####
 #### monitoring wells identified in the redundancy analysis are used:    ####
 #### Combines all scores together  Smw, Sew, Scs, Smik, Scov, Sexcee     ####
+#### Also extracts and exports sample dry well scoring to results table  ####
 
 
 ##############################################################################
@@ -53,6 +54,7 @@ import time
 import json
 from scipy.spatial import cKDTree
 from functools import reduce
+from scipy.stats import percentileofscore
 
 # define some global variables
 ecf_name = 'ECF-200ZP1-25-0092'
@@ -85,8 +87,9 @@ tag_list = ['only', 'detailed']
 
 # define helper functions for the workflow calculations
 
-# combine scores only for Smw, Sew, Scs
-def combine_all_scores(flag, gis_d, fig_d, ptrk_calc_d, tag):
+# combine scores for Smw, Sew, Scs, Smik, Scov, Sexcee 
+# exports sample dry well scoring results to table
+def combine_all_scores(flag, tag):
     if flag:
         print('combine_all_scores function selected to run...')
 
@@ -143,87 +146,123 @@ def combine_all_scores(flag, gis_d, fig_d, ptrk_calc_d, tag):
         combined_scores_df['ctet_uumu_persis_s'] = Smw_Sew_Scs_df['s_ctet_cs'] + Smik_Scov_Sexcee_df['ctet_uumu_clean_level_exceedance_score']
         combined_scores_df['ctet_lucr_persis_s'] = Smw_Sew_Scs_df['s_ctet_cs'] + Smik_Scov_Sexcee_df['ctet_lucr_clean_level_exceedance_score']
 
+        # calculate percentiles for grand total scores in the UU/MU and LU/CR
+        # the percentiles here to be contextualized with all 5330 data gap score locations
+        combined_scores_df['uumu_s_grandtotal_percentile'] = combined_scores_df['uumu_s_grandtotal'].apply(lambda x: percentileofscore(combined_scores_df['uumu_s_grandtotal'], x, kind='rank'))
+        combined_scores_df['lucr_s_grandtotal_percentile'] = combined_scores_df['lucr_s_grandtotal'].apply(lambda x: percentileofscore(combined_scores_df['lucr_s_grandtotal'], x, kind='rank'))
+
         # export to csv
         combined_scores_df.to_csv(os.path.join('scores_combined', f'scores_{tag}_Smw_Sew_Scs_Smik_Scov_Sexcee.csv'))
 
         # create gdf from merged df and export to shapefile
         combined_scores_gdf = gpd.GeoDataFrame(combined_scores_df, geometry = gpd.points_from_xy(combined_scores_df.EASTING, combined_scores_df.NORTHING), crs=crs_ref)
         combined_scores_gdf.to_file(os.path.join('scores_combined', f'scores_{tag}_Smw_Sew_Scs_Smik_Scov_Sexcee.shp'))
-        combined_scores_gdf_grid = gpd.sjoin(combined_scores_gdf, grid_gdf, how='inner', predicate='within')
+        combined_scores_gdf_grid = gpd.sjoin(grid_gdf, combined_scores_gdf, how='inner', predicate='contains')
         combined_scores_gdf_grid.to_file(os.path.join('scores_combined', f'scores_{tag}_Smw_Sew_Scs_Smik_Scov_Sexcee_grid.shp'))
 
+        # drop conflict columns for secondary merge
+        combined_scores_gdf_grid = combined_scores_gdf_grid.drop(columns=['index_right'])
+        # now pull in sample dry wells to extract calculated scores for the respective locations
+        sample_dry_wells_df = pd.read_csv(os.path.join('gis','xlsx', 'Sample_Dry_Wells', 'sampledrywells.csv'))
+        sample_dry_wells_gdf = gpd.GeoDataFrame(sample_dry_wells_df, geometry = gpd.points_from_xy(sample_dry_wells_df.EASTING, sample_dry_wells_df.NORTHING), crs=crs_ref)
+
+        # now extract results from combined_scores_gdf_grd and save to shapefile and csv
+        sample_dry_wells_scores_grid = gpd.sjoin(combined_scores_gdf_grid, sample_dry_wells_gdf, how='inner', predicate='contains')
+        sample_dry_wells_scores_grid.to_file(os.path.join('scores_combined', f'sample_dry_wells_scores_{tag}_Smw_Sew_Scs_Smik_Scov_Sexcee_grid.shp'))
+        sample_dry_wells_scores_grid = sample_dry_wells_scores_grid.drop(columns='geometry')
+
+        # calculate percentiles for grand total scores in the UU/MU and LU/CR
+        # update the percentiles here to be contextualized with all 5330 data gap score locations, calculate percentiles before merge datagap wells
+        #sample_dry_wells_scores_grid['uumu_s_grandtotal_percentile'] = sample_dry_wells_scores_grid['uumu_s_grandtotal'].apply(lambda x: percentileofscore(sample_dry_wells_scores_grid['uumu_s_grandtotal'], x, kind='rank'))
+        #sample_dry_wells_scores_grid['lucr_s_grandtotal_percentile'] = sample_dry_wells_scores_grid['lucr_s_grandtotal'].apply(lambda x: percentileofscore(sample_dry_wells_scores_grid['lucr_s_grandtotal'], x, kind='rank'))
+        
+        sample_dry_wells_scores_grid.to_csv(os.path.join('scores_combined', f'sample_dry_wells_scores_{tag}_Smw_Sew_Scs_Smik_Scov_Sexcee_grid.csv'))
+
         if tag == 'only':
+
+            uumu_grandtotal_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'uumu_s_grandtotal']]
+            uumu_grandtotal_gdf = gpd.GeoDataFrame(uumu_grandtotal_df, geometry = gpd.points_from_xy(uumu_grandtotal_df.EASTING, uumu_grandtotal_df.NORTHING), crs=crs_ref)
+            uumu_grandtotal_gdf.to_file(os.path.join('scores_combined', f'uumu_grandtotaldatagap_score_{tag}.shp'))
+            uumu_grandtotal_gdf_grid = gpd.sjoin(grid_gdf, uumu_grandtotal_gdf, how='inner', predicate='contains')
+            uumu_grandtotal_gdf_grid.to_file(os.path.join('scores_combined', f'uumu_grandtotaldatagap_score_{tag}_grid.shp'))
+
+            lucr_grandtotal_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'lucr_s_grandtotal']]
+            lucr_grandtotal_gdf = gpd.GeoDataFrame(lucr_grandtotal_df, geometry = gpd.points_from_xy(lucr_grandtotal_df.EASTING, lucr_grandtotal_df.NORTHING), crs=crs_ref)
+            lucr_grandtotal_gdf.to_file(os.path.join('scores_combined', f'lucr_grandtotaldatagap_score_{tag}.shp'))
+            lucr_grandtotal_gdf_grid = gpd.sjoin(grid_gdf, lucr_grandtotal_gdf, how='inner', predicate='contains')
+            lucr_grandtotal_gdf_grid.to_file(os.path.join('scores_combined', f'lucr_grandtotaldatagap_score_{tag}_grid.shp'))
+
             ctet_uumu_tdg_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'ctet_uumu_tdg_s']]
             ctet_uumu_tdg_s_gdf = gpd.GeoDataFrame(ctet_uumu_tdg_s_df, geometry = gpd.points_from_xy(ctet_uumu_tdg_s_df.EASTING, ctet_uumu_tdg_s_df.NORTHING), crs=crs_ref)
             ctet_uumu_tdg_s_gdf.to_file(os.path.join('scores_combined', f'ctet_uumu_totaldatagap_score_{tag}.shp'))
-            ctet_uumu_tdg_s_gdf_grid = gpd.sjoin(ctet_uumu_tdg_s_gdf, grid_gdf, how='inner', predicate='within')
+            ctet_uumu_tdg_s_gdf_grid = gpd.sjoin(grid_gdf, ctet_uumu_tdg_s_gdf, how='inner', predicate='contains')
             ctet_uumu_tdg_s_gdf_grid.to_file(os.path.join('scores_combined', f'ctet_uumu_totaldatagap_score_{tag}_grid.shp'))
 
             ctet_lucr_tdg_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'ctet_lucr_tdg_s']]
             ctet_lucr_tdg_s_gdf = gpd.GeoDataFrame(ctet_lucr_tdg_s_df, geometry = gpd.points_from_xy(ctet_lucr_tdg_s_df.EASTING, ctet_uumu_tdg_s_df.NORTHING), crs=crs_ref)
             ctet_lucr_tdg_s_gdf.to_file(os.path.join('scores_combined', f'ctet_lucr_totaldatagap_score_{tag}.shp'))
-            ctet_lucr_tdg_s_gdf_grid = gpd.sjoin(ctet_lucr_tdg_s_gdf, grid_gdf, how='inner', predicate='within')
+            ctet_lucr_tdg_s_gdf_grid = gpd.sjoin(grid_gdf, ctet_lucr_tdg_s_gdf, how='inner', predicate='contains')
             ctet_lucr_tdg_s_gdf_grid.to_file(os.path.join('scores_combined', f'ctet_lucr_totaldatagap_score_{tag}_grid.shp'))
 
             hcr_uumu_tdg_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'hcr_uumu_tdg_s']]
             hcr_uumu_tdg_s_gdf = gpd.GeoDataFrame(hcr_uumu_tdg_s_df, geometry = gpd.points_from_xy(hcr_uumu_tdg_s_df.EASTING, hcr_uumu_tdg_s_df.NORTHING), crs=crs_ref)
             hcr_uumu_tdg_s_gdf.to_file(os.path.join('scores_combined', f'hcr_uumu_totaldatagap_score_{tag}.shp'))
-            hcr_uumu_tdg_s_gdf_grid = gpd.sjoin(hcr_uumu_tdg_s_gdf, grid_gdf, how='inner', predicate='within')
+            hcr_uumu_tdg_s_gdf_grid = gpd.sjoin(grid_gdf, hcr_uumu_tdg_s_gdf, how='inner', predicate='contains')
             hcr_uumu_tdg_s_gdf_grid.to_file(os.path.join('scores_combined', f'hcr_uumu_totaldatagap_score_{tag}_grid.shp'))
 
             hcr_lucr_tdg_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'hcr_lucr_tdg_s']]
             hcr_lucr_tdg_s_gdf = gpd.GeoDataFrame(hcr_lucr_tdg_s_df, geometry = gpd.points_from_xy(hcr_lucr_tdg_s_df.EASTING, hcr_uumu_tdg_s_df.NORTHING), crs=crs_ref)
             hcr_lucr_tdg_s_gdf.to_file(os.path.join('scores_combined', f'hcr_lucr_totaldatagap_score_{tag}.shp'))
-            hcr_lucr_tdg_s_gdf_grid = gpd.sjoin(hcr_lucr_tdg_s_gdf, grid_gdf, how='inner', predicate='within')
+            hcr_lucr_tdg_s_gdf_grid = gpd.sjoin(grid_gdf, hcr_lucr_tdg_s_gdf, how='inner', predicate='contains')
             hcr_lucr_tdg_s_gdf_grid.to_file(os.path.join('scores_combined', f'hcr_lucr_totaldatagap_score_{tag}_grid.shp'))
 
             tec_uumu_tdg_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'tec_uumu_tdg_s']]
             tec_uumu_tdg_s_gdf = gpd.GeoDataFrame(tec_uumu_tdg_s_df, geometry = gpd.points_from_xy(tec_uumu_tdg_s_df.EASTING, tec_uumu_tdg_s_df.NORTHING), crs=crs_ref)
             tec_uumu_tdg_s_gdf.to_file(os.path.join('scores_combined', f'tec_uumu_totaldatagap_score_{tag}.shp'))
-            tec_uumu_tdg_s_gdf_grid = gpd.sjoin(tec_uumu_tdg_s_gdf, grid_gdf, how='inner', predicate='within')
+            tec_uumu_tdg_s_gdf_grid = gpd.sjoin(grid_gdf, tec_uumu_tdg_s_gdf, how='inner', predicate='contains')
             tec_uumu_tdg_s_gdf_grid.to_file(os.path.join('scores_combined', f'tec_uumu_totaldatagap_score_{tag}_grid.shp'))
 
             tec_lucr_tdg_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'tec_lucr_tdg_s']]
             tec_lucr_tdg_s_gdf = gpd.GeoDataFrame(tec_lucr_tdg_s_df, geometry = gpd.points_from_xy(tec_lucr_tdg_s_df.EASTING, tec_uumu_tdg_s_df.NORTHING), crs=crs_ref)
             tec_lucr_tdg_s_gdf.to_file(os.path.join('scores_combined', f'tec_lucr_totaldatagap_score_{tag}.shp'))
-            tec_lucr_tdg_s_gdf_grid = gpd.sjoin(tec_lucr_tdg_s_gdf, grid_gdf, how='inner', predicate='within')
+            tec_lucr_tdg_s_gdf_grid = gpd.sjoin(grid_gdf, tec_lucr_tdg_s_gdf, how='inner', predicate='contains')
             tec_lucr_tdg_s_gdf_grid.to_file(os.path.join('scores_combined', f'tec_lucr_totaldatagap_score_{tag}_grid.shp'))
 
             # contaminant-specific contaminant persistence scores
             hcr_uumu_persis_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'hcr_uumu_persis_s']]
             hcr_uumu_persis_s_gdf = gpd.GeoDataFrame(hcr_uumu_persis_s_df, geometry = gpd.points_from_xy(hcr_uumu_persis_s_df.EASTING, hcr_uumu_persis_s_df.NORTHING), crs=crs_ref)
             hcr_uumu_persis_s_gdf.to_file(os.path.join('scores_combined', f'hcr_uumu_persistence_score_{tag}.shp'))
-            hcr_uumu_persis_s_gdf_grid = gpd.sjoin(hcr_uumu_persis_s_gdf, grid_gdf, how='inner', predicate='within')
+            hcr_uumu_persis_s_gdf_grid = gpd.sjoin(grid_gdf, hcr_uumu_persis_s_gdf, how='inner', predicate='contains')
             hcr_uumu_persis_s_gdf_grid.to_file(os.path.join('scores_combined', f'hcr_uumu_persistence_score_{tag}_grid.shp'))
 
             hcr_lucr_persis_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'hcr_lucr_persis_s']]
             hcr_lucr_persis_s_gdf = gpd.GeoDataFrame(hcr_lucr_persis_s_df, geometry = gpd.points_from_xy(hcr_lucr_persis_s_df.EASTING, hcr_lucr_persis_s_df.NORTHING), crs=crs_ref)
             hcr_lucr_persis_s_gdf.to_file(os.path.join('scores_combined', f'hcr_lucr_persistence_score_{tag}.shp'))
-            hcr_lucr_persis_s_gdf_grid = gpd.sjoin(hcr_lucr_persis_s_gdf, grid_gdf, how='inner', predicate='within')
+            hcr_lucr_persis_s_gdf_grid = gpd.sjoin(grid_gdf, hcr_lucr_persis_s_gdf, how='inner', predicate='contains')
             hcr_lucr_persis_s_gdf_grid.to_file(os.path.join('scores_combined', f'hcr_lucr_persistence_score_{tag}_grid.shp'))
 
             tec_uumu_persis_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'tec_uumu_persis_s']]
             tec_uumu_persis_s_gdf = gpd.GeoDataFrame(tec_uumu_persis_s_df, geometry = gpd.points_from_xy(tec_uumu_persis_s_df.EASTING, tec_uumu_persis_s_df.NORTHING), crs=crs_ref)
             tec_uumu_persis_s_gdf.to_file(os.path.join('scores_combined', f'tec_uumu_persistence_score_{tag}.shp'))
-            tec_uumu_persis_s_gdf_grid = gpd.sjoin(tec_uumu_persis_s_gdf, grid_gdf, how='inner', predicate='within')
+            tec_uumu_persis_s_gdf_grid = gpd.sjoin(grid_gdf, tec_uumu_persis_s_gdf, how='inner', predicate='contains')
             tec_uumu_persis_s_gdf_grid.to_file(os.path.join('scores_combined', f'tec_uumu_persistence_score_{tag}_grid.shp'))
 
             tec_lucr_persis_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'tec_lucr_persis_s']]
             tec_lucr_persis_s_gdf = gpd.GeoDataFrame(tec_lucr_persis_s_df, geometry = gpd.points_from_xy(tec_lucr_persis_s_df.EASTING, tec_lucr_persis_s_df.NORTHING), crs=crs_ref)
             tec_lucr_persis_s_gdf.to_file(os.path.join('scores_combined', f'tec_lucr_persistence_score_{tag}.shp'))
-            tec_lucr_persis_s_gdf_grid = gpd.sjoin(tec_lucr_persis_s_gdf, grid_gdf, how='inner', predicate='within')
+            tec_lucr_persis_s_gdf_grid = gpd.sjoin(grid_gdf, tec_lucr_persis_s_gdf, how='inner', predicate='contains')
             tec_lucr_persis_s_gdf_grid.to_file(os.path.join('scores_combined', f'tec_lucr_persistence_score_{tag}_grid.shp'))
 
             ctet_uumu_persis_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'ctet_uumu_persis_s']]
             ctet_uumu_persis_s_gdf = gpd.GeoDataFrame(ctet_uumu_persis_s_df, geometry = gpd.points_from_xy(ctet_uumu_persis_s_df.EASTING, ctet_uumu_persis_s_df.NORTHING), crs=crs_ref)
             ctet_uumu_persis_s_gdf.to_file(os.path.join('scores_combined', f'ctet_uumu_persistence_score_{tag}.shp'))
-            ctet_uumu_persis_s_gdf_grid = gpd.sjoin(ctet_uumu_persis_s_gdf, grid_gdf, how='inner', predicate='within')
+            ctet_uumu_persis_s_gdf_grid = gpd.sjoin(grid_gdf, ctet_uumu_persis_s_gdf, how='inner', predicate='contains')
             ctet_uumu_persis_s_gdf_grid.to_file(os.path.join('scores_combined', f'ctet_uumu_persistence_score_{tag}_grid.shp'))
 
             ctet_lucr_persis_s_df = combined_scores_df[['row', 'col', 'row_col_id', 'x', 'y', 'EASTING', 'NORTHING', 'ctet_lucr_persis_s']]
             ctet_lucr_persis_s_gdf = gpd.GeoDataFrame(ctet_lucr_persis_s_df, geometry = gpd.points_from_xy(ctet_lucr_persis_s_df.EASTING, ctet_lucr_persis_s_df.NORTHING), crs=crs_ref)
             ctet_lucr_persis_s_gdf.to_file(os.path.join('scores_combined', f'ctet_lucr_persistence_score_{tag}.shp'))
-            ctet_lucr_persis_s_gdf_grid = gpd.sjoin(ctet_lucr_persis_s_gdf, grid_gdf, how='inner', predicate='within')
+            ctet_lucr_persis_s_gdf_grid = gpd.sjoin(grid_gdf, ctet_lucr_persis_s_gdf, how='inner', predicate='contains')
             ctet_lucr_persis_s_gdf_grid.to_file(os.path.join('scores_combined', f'ctet_lucr_persistence_score_{tag}_grid.shp'))
 
     else:
@@ -243,7 +282,7 @@ def main():
         
         # combine calculated scores into csvs and shapefiles for Smw, Sew, Scs, Smik, Scov, Sexcee
         for tag in tag_list:
-            combine_all_scores(flag_combine_all_scores, gis_d, fig_d, ptrk_calc_d, tag)             
+            combine_all_scores(flag_combine_all_scores, tag)             
         
     else:
         print('ecf calculations workflows NOT selected to run, \n check booleans...')

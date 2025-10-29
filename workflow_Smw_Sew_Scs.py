@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created July 2025
+Created July 2025, Updated October 2025 for additional 200-UP-1 WMAs S & SX SY
 
 @author: afoster
 """
@@ -80,11 +80,12 @@ exe_d = os.path.join(cwd, 'bin', 'win')
 flow_source_d = os.path.join(cwd, 'source_files', 'flow', 'source')
 transport_source_d = os.path.join(cwd, 'source_files', 'transport')
 ptrk_calc_d = os.path.join(cwd, 'calcs', 'ptrack')
+ptrk_ssx_calc_d = os.path.join(cwd, 'calcs', 'ptrack-ssx')
 gis_d = os.path.join(cwd, 'gis')
 fig_d = os.path.join(cwd, 'figs')
 
 # global boolen to turn the ECF workflow on, must be turned to call helper functions in the main()
-flag_new_ecf = False
+flag_new_ecf = True
 
 # booleans to turn on each calc function incrementally that are called in main()
 # perform sequentially by turning each boolen on, running function, then turning off before running the next function. 
@@ -747,10 +748,16 @@ def generate_part_start_locs(flag, constituent, ptrk_calc_d, pstrt_fnm, gis_d):
 
         # load in reference gis files for particle starting locations
         if constituent == 'cr':
-            source_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+                source_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            else:
+                source_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
         
         if constituent == 'tec-99':
-            source_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+            if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+                source_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+            else:
+                source_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
         
         # load in model shapefile
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
@@ -1078,10 +1085,20 @@ def generate_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+        
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+        
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # load in particle starting locations and pathlines for each source area type
@@ -1134,7 +1151,12 @@ def generate_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
         te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+        
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+        else:
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
         cr_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=1, alpha=0.5, label='cr mp3du pathlines')
         tec99_pathlines.plot(ax=ax, linewidth=0.2, color='fuchsia', zorder=1, alpha=0.5, label='tec-99 mp3du pathlines')
@@ -1146,37 +1168,69 @@ def generate_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
 
         # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
-            Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
-        ]
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
+        else:
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
 
         ax.legend(handles=legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Pathlines from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_map_centroids_ssxsy.png'), dpi=400)
+
         else:
-            plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_map_centroids.png'), dpi=400)
+
         plt.show()
         plt.close()
 
@@ -1193,10 +1247,20 @@ def generate_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # load in particle starting locations and endpoints for each source area type
@@ -1249,7 +1313,12 @@ def generate_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
         te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+        
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+        else:
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+        
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
         cr_endpoints.plot(ax=ax, edgecolor='chocolate', zorder=1, facecolor='None', alpha=0.5, label='cr mp3du endpoints')
         tec99_endpoints.plot(ax=ax, edgecolor='fuchsia', zorder=1, facecolor='None', alpha=0.5, label='tec-99 mp3du endpoints')
@@ -1261,37 +1330,69 @@ def generate_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
 
         # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
-            Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
-        ]
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
+
+        else:
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
 
         ax.legend(handles=legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Endpoints from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'mp3du_endpoints_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_endpoints_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_endpoints_map_centroids_ssxsy.png'), dpi=400)
         else:
-            plt.savefig(os.path.join(fig_d, 'mp3du_endpoints_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_endpoints_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_endpoints_map_centroids.png'), dpi=400)
+
         plt.show()
         plt.close()
 
@@ -1308,10 +1409,20 @@ def generate_pathlines_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type)
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # load in particle starting locations and endpoints for each source area type
@@ -1371,7 +1482,12 @@ def generate_pathlines_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type)
         cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
         te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+        else:
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
         cr_endpoints.plot(ax=ax, edgecolor='chocolate', zorder=1, facecolor='None', alpha=0.5, label='cr mp3du endpoints')
         tec99_endpoints.plot(ax=ax, edgecolor='fuchsia', zorder=1, facecolor='None', alpha=0.5, label='tec-99 mp3du endpoints')
@@ -1385,39 +1501,72 @@ def generate_pathlines_endpoints_map(flag, gis_d, fig_d, ptrk_calc_d, part_type)
         existing_candidate_wells_mw_gdf.plot(ax=ax, facecolor='lightgreen', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells')
 
         # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
-            Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
-            Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
-        ]
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
+        else:
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec-99 mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
 
         ax.legend(handles=legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Pathlines & Endpoints from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_endpoints_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_endpoints_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_endpoints_map_centroids_ssxsy.png'), dpi=400)
         else:
-            plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_endpoints_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_endpoints_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_pathlines_endpoints_map_centroids.png'), dpi=400)
+
         plt.show()
 
     else:
@@ -1456,11 +1605,19 @@ def calc_relative_path_count(flag, gis_d, ptrk_calc_d):
         pathlines_fpth = os.path.join(gis_d, 'shp', 'pathlines')
         if not os.path.exists(pathlines_fpth):
             os.makedirs(pathlines_fpth)
-        pathlines_gdf.to_file(os.path.join(pathlines_fpth, 'pathlines_both_source_areas.shp')) 
+        
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            fnm_pathlines_gdf = 'pathlines_both_source_areas_ssxsy.shp'
+        else:
+            fnm_pathlines_gdf = 'pathlines_both_source_areas.shp'
+        pathlines_gdf.to_file(os.path.join(pathlines_fpth, fnm_pathlines_gdf)) 
 
         # spatial join combined source area pathlines with data gap model cell locations
         mdgrd_sjoin = gpd.sjoin(model_grid_gdf, pathlines_gdf, how='left', predicate='intersects')
-        mdgrd_sjoin.to_file(os.path.join(out_fpth, 'mdgrd_sjoin.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            mdgrd_sjoin.to_file(os.path.join(out_fpth, 'mdgrd_sjoin_ssxsy.shp'))
+        else:
+            mdgrd_sjoin.to_file(os.path.join(out_fpth, 'mdgrd_sjoin.shp'))
 
         # count the total number of pathlines intersecting each model cell
         join_counts = mdgrd_sjoin.groupby("ID")["PID"].nunique().reset_index()
@@ -1475,7 +1632,10 @@ def calc_relative_path_count(flag, gis_d, ptrk_calc_d):
         mdgrd_sjoin["path_count"] = mdgrd_sjoin["pid_count"].fillna(0).astype(int)
         
         # Save the updated shapefile
-        mdgrd_sjoin.to_file(os.path.join(out_fpth, "mdgrd_sjoin_with_counts.shp"))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            mdgrd_sjoin.to_file(os.path.join(out_fpth, "mdgrd_sjoin_with_counts_ssxsy.shp"))
+        else:
+            mdgrd_sjoin.to_file(os.path.join(out_fpth, "mdgrd_sjoin_with_counts.shp"))
 
         # calculate the relative path count per data gap model cell location & normalize to the max, keep unique
         unique_mdgrd_gdf_sjoin = mdgrd_sjoin.drop_duplicates(subset=["ID"]).reset_index(drop=True)
@@ -1485,7 +1645,10 @@ def calc_relative_path_count(flag, gis_d, ptrk_calc_d):
         unique_mdgrd_gdf_sjoin['rel_det'] = unique_mdgrd_gdf_sjoin['path_count'] / unique_mdgrd_gdf_sjoin['path_count'].max()
 
         # export the relative normalization to a shapefile
-        unique_mdgrd_gdf_sjoin.to_file(os.path.join(out_fpth, 'mp3du_relative_detectability.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            unique_mdgrd_gdf_sjoin.to_file(os.path.join(out_fpth, 'mp3du_relative_detectability_ssxsy.shp'))
+        else:
+            unique_mdgrd_gdf_sjoin.to_file(os.path.join(out_fpth, 'mp3du_relative_detectability.shp'))
 
     else:
         print('calc_relative_path_count function selected NOT to run...')
@@ -1506,10 +1669,20 @@ def generate_relcount_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
                   'darkorange', 'orangered', 'red']
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+            
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+        
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+        
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # load in particle starting locations and pathlines for each source area type
@@ -1531,7 +1704,10 @@ def generate_relcount_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
             print('the crs of the model grid is not being updated for consistency...')
 
         # load in relative pathline shapefile here
-        relcount_path_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'pathline_count', 'mp3du_relative_detectability.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            relcount_path_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'pathline_count', 'mp3du_relative_detectability_ssxsy.shp'))
+        else:
+            relcount_path_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'pathline_count', 'mp3du_relative_detectability.shp'))
                                           
         # load in data gap locations
         data_gap_locs = gpd.read_file(os.path.join(gis_d, 'shp', 'data_gap_wells', 'potential_wells.shp'))
@@ -1549,7 +1725,12 @@ def generate_relcount_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
         cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
         te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+        else:
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+        
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
         cr_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
         tec99_part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=1, alpha=1, label='tec-99 particle starting locations')
@@ -1568,37 +1749,67 @@ def generate_relcount_pathlines_map(flag, gis_d, fig_d, ptrk_calc_d, part_type):
 
 
         # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
-            Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
-        ]
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
+
+        else:
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec-99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells')
+            ]
 
         combined_legend_elements = legend_elements + colorflood_legend_elements
 
         ax.legend(handles=combined_legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Color Flood of Relative Pathline Counts from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'mp3du_relative_count_pathlines_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_relative_count_pathlines_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_relative_count_pathlines_map_centroids_ssxsy.png'), dpi=400)
         else:
-            plt.savefig(os.path.join(fig_d, 'mp3du_relative_count_pathlines_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'mp3du_relative_count_pathlines_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'mp3du_relative_count_pathlines_map_centroids.png'), dpi=400)
+
         plt.show()
         plt.close()
 
@@ -1610,23 +1821,41 @@ def parse_source_zones(flag, gis_d, fig_d, ptrk_calc_d, part_type):
     if flag:
         print('parsing out individual continuous source zones for cr & tec99 into shps...')
 
-        # parse cr continuing source zones 
-        cr_source_zones = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        
-        cr_source_zone_north = cr_source_zones.iloc[[0]]
-        cr_source_zone_north.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_North.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            # parse cr continuing source zones 
+            cr_source_zones = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            
+            cr_source_zone_north = cr_source_zones.iloc[[0]]
+            cr_source_zone_north.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX_North.shp'))
 
-        cr_source_zone_south = cr_source_zones.iloc[[1]]
-        cr_source_zone_south.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_South.shp'))
+            cr_source_zone_south = cr_source_zones.iloc[[1]]
+            cr_source_zone_south.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX_South.shp'))
 
-        # parse tec99 continuing source zones
-        tec99_source_zones = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+            # parse tec99 continuing source zones
+            tec99_source_zones = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
 
-        tec99_source_zone_north = tec99_source_zones.iloc[[0]]
-        tec99_source_zone_north.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_North.shp'))
+            tec99_source_zone_north = tec99_source_zones.iloc[[0]]
+            tec99_source_zone_north.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX_North.shp'))
 
-        tec99_source_zone_south = tec99_source_zones.iloc[[1]]
-        tec99_source_zone_south.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_South.shp'))
+        else:
+
+            # parse cr continuing source zones 
+            cr_source_zones = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            
+            cr_source_zone_north = cr_source_zones.iloc[[0]]
+            cr_source_zone_north.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_North.shp'))
+
+            cr_source_zone_south = cr_source_zones.iloc[[1]]
+            cr_source_zone_south.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_South.shp'))
+
+            # parse tec99 continuing source zones
+            tec99_source_zones = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
+            tec99_source_zone_north = tec99_source_zones.iloc[[0]]
+            tec99_source_zone_north.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_North.shp'))
+
+            tec99_source_zone_south = tec99_source_zones.iloc[[1]]
+            tec99_source_zone_south.to_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_South.shp'))
 
     else:
         print('parse_source_zones function selected NOT to run...')
@@ -1642,11 +1871,14 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
         
         # load in reference gis files for particle starting locations
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # load in particle starting locations, pathlines, and endpoints for each source area type
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             source_area_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', source_area+'.shp'))
             if part_type == 'ring':
                 cr_part_starts = gpd.read_file(os.path.join(ptrk_calc_d, 'cr', 'particle_starting_locations_ring', 'particle_starting_locations_ring.shp'))
@@ -1662,9 +1894,12 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
             part_endpoints = cr_endpoints
 
             # load in source area polygon
-            source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+                source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            else:
+                source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
         
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             source_area_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', source_area+'.shp'))
             if part_type == 'ring':
                 tec99_part_starts = gpd.read_file(os.path.join(ptrk_calc_d, 'tec-99', 'particle_starting_locations_ring', 'particle_starting_locations_ring.shp')) 
@@ -1680,7 +1915,10 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
             part_endpoints = tec99_endpoints
 
             # load in source area polygon
-            source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+            if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+                source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+            else:
+                source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
 
         # check model grid crs
         mdgrd_crs = model_grid_gdf.crs
@@ -1721,24 +1959,27 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
 
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='cr source zones')
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))        
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             part_endpoints.plot(ax=ax, edgecolor='chocolate', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='cr mp3du endpoints')
             part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             part_endpoints.plot(ax=ax, edgecolor='fuchsia', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='tec99 mp3du endpoints')
             part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=3, alpha=1, label='tec99 particle starting locations')
         data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             part_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=2, alpha=0.5, label='cr p3du pathlines')
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             part_pathlines.plot(ax=ax, linewidth=0.2, color='fuchsia', zorder=2, alpha=0.5, label='tec99 p3du pathlines')
         candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
         candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
@@ -1780,10 +2021,53 @@ def generate_bounding_polygon(flag, gis_d, fig_d, ptrk_calc_d, part_type, source
                 Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR')
             ]
 
+        if source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='cr source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR')
+            ]
+
+        if source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
+            legend_elements = [
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=1, label='tec99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec99 mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR')
+            ]
+
         #ax.legend(handles=legend_elements, loc='upper right')
 
-        plt.ylim([136000, 137250])
-        plt.xlim([566500, 568000])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Pathlines & Endpoints from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
@@ -1859,11 +2143,14 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
         cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
         #te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # load in particle starting locations, pathlines, and endpoints for each source area type
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             source_area_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', source_area+'.shp'))
             if part_type == 'ring':
                 cr_part_starts = gpd.read_file(os.path.join(ptrk_calc_d, 'cr', 'particle_starting_locations_ring', 'particle_starting_locations_ring.shp'))
@@ -1879,7 +2166,7 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
             part_endpoints = cr_endpoints
             bounding_polygon = gpd.read_file(os.path.join('gis', 'shp', 'pathlines', f'{source_area}_bounding_final.shp'))
         
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             source_area_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', source_area+'.shp'))
             if part_type == 'ring':
                 tec99_part_starts = gpd.read_file(os.path.join(ptrk_calc_d, 'tec-99', 'particle_starting_locations_ring', 'particle_starting_locations_ring.shp')) 
@@ -1934,24 +2221,27 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
 
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             source_area_gdf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='cr source zones')
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             source_area_gdf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
         wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))         
         model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             part_endpoints.plot(ax=ax, edgecolor='chocolate', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='cr mp3du endpoints')
             part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='chocolate', zorder=1, alpha=1, label='cr particle starting locations')
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             part_endpoints.plot(ax=ax, edgecolor='fuchsia', markersize=4, zorder=2, facecolor='None', alpha=0.5, label='tec99 mp3du endpoints')
             part_starts.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.2, facecolor='fuchsia', zorder=3, alpha=1, label='tec99 particle starting locations')
         data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
         hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South':
+        if source_area == 'Chromium_Source_North' or source_area == 'Chromium_Source_South' or source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
             part_pathlines.plot(ax=ax, linewidth=0.2, color='chocolate', zorder=2, alpha=0.5, label='cr p3du pathlines')
-        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South':
+        if source_area == 'Technetium_Source_North' or source_area == 'Technetium_Source_South' or source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
             part_pathlines.plot(ax=ax, linewidth=0.2, color='fuchsia', zorder=2, alpha=0.5, label='tec99 p3du pathlines')
         candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
         candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
@@ -1996,10 +2286,55 @@ def generate_centerline(flag, gis_d, fig_d, ptrk_calc_d, part_type, source_area)
                 Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
                 Patch(facecolor='salmon', edgecolor='black', alpha=0.25, label='bounding polygon for source area')
             ]
+        if source_area == 'Chromium_Source_S-SX_North' or source_area == 'Chromium_Source_S-SX_South':
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='chocolate', markeredgecolor='black', alpha=1, markersize=8, label='cr particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='chocolate', linewidth=0.2, alpha=0.5, label='cr mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='salmon', edgecolor='black', alpha=0.25, label='bounding polygon for source area')
+            ]
+        if source_area == 'Technetium_Source_S-SX_North' or source_area == 'Technetium_Source_S-SX_South':
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Patch(facecolor='None', edgecolor='fuchsia', linewidth=0.2, alpha=0.5, label='tec99 mp3du endpoints'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='fuchsia', markeredgecolor='black', alpha=1, markersize=8, label='tec99 particle starting locations'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], color='fuchsia', linewidth=0.2, alpha=0.5, label='tec99 mp3du pathlines'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells'),
+                Line2D([0], [0], marker='o', markerfacecolor='lightgreen', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='salmon', edgecolor='black', alpha=0.25, label='bounding polygon for source area')
+            ]
         #ax.legend(handles=legend_elements, loc='upper right')
 
-        plt.ylim([136000, 137250])
-        plt.xlim([566500, 568000])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Pathlines & Endpoints from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
@@ -2051,10 +2386,18 @@ def generate_bounding_centerline_map_all(flag, gis_d, fig_d, ptrk_calc_d, part_t
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # check model grid crs
@@ -2089,76 +2432,136 @@ def generate_bounding_centerline_map_all(flag, gis_d, fig_d, ptrk_calc_d, part_t
         candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
         # load in bounding polygons and centerlines
-        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
-        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
-        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
-        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
-        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
-        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
-        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
-        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_North_bounding_final.shp'))
+            cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_South_bounding_final.shp'))
+            tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_S-SX_North_bounding_final.shp'))
+            cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_North_centerline_final.shp'))
+            cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_South_centerline_final.shp'))
+            tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_S-SX_North_centerline_final.shp'))
+        else:
+            cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
+            cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
+            tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
+            tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
+            cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
+            cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
+            tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
+            tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
 
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
+            cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
+            cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
+            cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
+            tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tec99 north bounding polygon')
+            tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 north centerline')
 
-        cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
-        te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
-        wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
-        model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
-        hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
-        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
-        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
-        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
-        cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
-        cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
-        cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
-        cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
-        tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tech99 north bounding polygon')
-        tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tech99 north centerline')
-        tec99_south_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.25, label='tec99 south bounding polygon')
-        tec99_south_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tech99 north bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tec99 north centerline')
+            ]
+        else:
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
+            cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
+            cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
+            cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
+            tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tec99 north bounding polygon')
+            tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 north centerline')
+            tec99_south_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.25, label='tec99 south bounding polygon')
+            tec99_south_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
 
-        # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
-            Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
-            Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
-            Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
-            Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
-            Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tech99 north bounding polygon'),
-            Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tech99 north centerline'),
-            Patch(facecolor='fuchsia', edgecolor='black', alpha=0.2, label='tec99 south bounding polygon'),
-            Line2D([0], [0], color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
-        ]
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tec99 north bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tech99 north centerline'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.2, label='tec99 south bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
+            ]
 
         ax.legend(handles=legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Bounding Polygons & Centerlines from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_bounding_centerline_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_bounding_centerline_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_bounding_centerline_map_centroids_ssxsy.png'), dpi=400)
         else:
-            plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_bounding_centerline_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_bounding_centerline_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_bounding_centerline_map_centroids.png'), dpi=400)
     else:
         print('generate_bounding_centerline_map_all function selected NOT to run...')
 
@@ -2205,7 +2608,7 @@ def potential_wells_in_bounding(flag, gis_d, fig_d,ptrk_calc_d, source_area):
         print('potential_wells_in_bounding function selected NOT to run...')
 
 # calculate scores for continuous source areas all constituents combined
-def calculate_continuous_source_score_all(flag, gis_d, fig_d, ptrk_calc_d, source_area_list):
+def calculate_continuous_source_score_all(flag, gis_d, source_area_list):
     if flag:
         print('calculating continuous source scores for all constituents combined...')
         compiled_scores = []
@@ -2279,10 +2682,20 @@ def generate_continuous_source_score_map_all(flag, gis_d, fig_d, ptrk_calc_d, pa
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # check model grid crs
@@ -2317,14 +2730,22 @@ def generate_continuous_source_score_map_all(flag, gis_d, fig_d, ptrk_calc_d, pa
         candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
         # load in bounding polygons and centerlines
-        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
-        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
-        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
-        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
-        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
-        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
-        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
-        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_North_bounding_final.shp'))
+            cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_South_bounding_final.shp'))
+            tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_S-SX_North_bounding_final.shp'))
+            cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_North_centerline_final.shp'))
+            cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_South_centerline_final.shp'))
+            tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_S-SX_North_centerline_final.shp'))
+        else:
+            cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
+            cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
+            tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
+            tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
+            cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
+            cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
+            tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
+            tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
 
         # load continuous source score points
         continuous_source_score_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'all_combined_continuous_source_scores.shp'))
@@ -2338,25 +2759,44 @@ def generate_continuous_source_score_map_all(flag, gis_d, fig_d, ptrk_calc_d, pa
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
 
-        cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
-        te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
-        wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
-        model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
-        hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
-        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
-        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
-        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
-        cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
-        cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
-        cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
-        cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
-        tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tech99 north bounding polygon')
-        tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tech99 north centerline')
-        tec99_south_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.25, label='tec99 south bounding polygon')
-        tec99_south_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
+            cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
+            cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
+            cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
+            tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tec99 north bounding polygon')
+            tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 north centerline')
+        else:
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
+            cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
+            cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
+            cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
+            tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tec99 north bounding polygon')
+            tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 north centerline')
+            tec99_south_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.25, label='tec99 south bounding polygon')
+            tec99_south_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
 
         colorflood_legend_elements = []
         # plot final continuous source score shapefile here
@@ -2366,46 +2806,81 @@ def generate_continuous_source_score_map_all(flag, gis_d, fig_d, ptrk_calc_d, pa
             # Add corresponding legend patch
             colorflood_legend_elements.append(Patch(facecolor=color, edgecolor='black', alpha=0.75, label=f'{low}-{high}'))
 
-        # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
-            Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
-            Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
-            Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
-            Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
-            Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tech99 north bounding polygon'),
-            Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tech99 north centerline'),
-            Patch(facecolor='fuchsia', edgecolor='black', alpha=0.2, label='tec99 south bounding polygon'),
-            Line2D([0], [0], color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
-        ]
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tec99 north bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tec99 north centerline')
+            ]
+        else:
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tec99 north bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tec99 north centerline'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.2, label='tec99 south bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
+            ]
 
         combined_legend_elements = legend_elements + colorflood_legend_elements
 
         ax.legend(handles=combined_legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Continuous Source Score Map from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_continuous_source_score_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_continuous_source_score_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_continuous_source_score_map_centroids_ssxsy.png'), dpi=400)
         else:
-            plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_continuous_source_score_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_continuous_source_score_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'all_constituents_mp3du_continuous_source_score_map_centroids.png'), dpi=400)
     else:
         print('generate_continuous_source_score_map function selected NOT to run for all constituents combined...')
 
@@ -2419,10 +2894,20 @@ def generate_continuous_source_score_map_chromium(flag, gis_d, fig_d, ptrk_calc_
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # check model grid crs
@@ -2457,10 +2942,16 @@ def generate_continuous_source_score_map_chromium(flag, gis_d, fig_d, ptrk_calc_
         candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
         # load in bounding polygons and centerlines
-        cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
-        cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
-        cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
-        cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_North_bounding_final.shp'))
+            cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_South_bounding_final.shp'))
+            cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_North_centerline_final.shp'))
+            cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_S-SX_South_centerline_final.shp'))
+        else:
+            cr_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_bounding_final.shp'))
+            cr_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_bounding_final.shp'))
+            cr_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_North_centerline_final.shp'))
+            cr_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Chromium_Source_South_centerline_final.shp'))
 
 
         # load continuous source score points
@@ -2475,21 +2966,38 @@ def generate_continuous_source_score_map_chromium(flag, gis_d, fig_d, ptrk_calc_
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
 
-        cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
-        te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
-        wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
-        model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
-        hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
-        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
-        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
-        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
-        cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
-        cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
-        cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
-        cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
+            cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
+            cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
+            cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
+        else:
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            cr_north_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.5, label='cr north bounding polygon')
+            cr_north_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline')
+            cr_south_bound.plot(ax=ax, facecolor='chocolate', edgecolor='black', alpha=0.25, label='cr south bounding polygon')
+            cr_south_centerline.plot(ax=ax, color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr south centerline')
 
 
         colorflood_legend_elements = []
@@ -2500,42 +3008,75 @@ def generate_continuous_source_score_map_chromium(flag, gis_d, fig_d, ptrk_calc_
             # Add corresponding legend patch
             colorflood_legend_elements.append(Patch(facecolor=color, edgecolor='black', alpha=0.75, label=f'{low}-{high}'))
 
-        # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
-            Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
-            Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
-            Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
-            Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
-        ]
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA S & WMA SX-SY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
+            ]
+        else:
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.8, label='cr north bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--', alpha=1, label='cr north centerline'),
+                Patch(facecolor='chocolate', edgecolor='black', alpha=0.6, label='cr south bounding polygon'),
+                Line2D([0], [0], color='brown', linewidth=1.5, linestyle='--',  alpha=1, label='cr south centerline'),
+            ]
 
         combined_legend_elements = legend_elements + colorflood_legend_elements
 
         ax.legend(handles=combined_legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Chromium Continuous Source Score Map from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'chromium_mp3du_continuous_source_score_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'chromium_mp3du_continuous_source_score_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'chromium_mp3du_continuous_source_score_map_centroids_ssxsy.png'), dpi=400)
         else:
-            plt.savefig(os.path.join(fig_d, 'chromium_mp3du_continuous_source_score_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'chromium_mp3du_continuous_source_score_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'chromium_mp3du_continuous_source_score_map_centroids.png'), dpi=400)
     else:
         print('generate_continuous_source_score_map function selected NOT to run for chromium...')
 
@@ -2549,10 +3090,20 @@ def generate_continuous_source_score_map_tec99(flag, gis_d, fig_d, ptrk_calc_d, 
             os.makedirs(fig_d)
         
         # load in reference gis files for particle starting locations
-        cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
-        te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source_S-SX.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source_S-SX.shp'))
+        else:
+            cr_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Chromium_Source.shp'))
+            te_source_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'source_areas', 'Technetium_Source.shp'))
+
         wids_poly_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WIDS_polygons_published.shp'))
-        wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            wma_S_wma_sxsy_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_S_WMA_SXSY.shp'))
+        else:
+            wma_T_wma_txty_gpf = gpd.read_file(os.path.join(gis_d, 'shp', 'misc', 'WMA_T_WMA_TXTY.shp'))
+
         model_grid_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'model_grid', 'model_grid.shp'))
 
         # check model grid crs
@@ -2587,10 +3138,14 @@ def generate_continuous_source_score_map_tec99(flag, gis_d, fig_d, ptrk_calc_d, 
         candidate_wells_ew_lucr_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'candidate_ews_lu_cr.shp'))
 
         # load in bounding polygons and centerlines
-        tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
-        tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
-        tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
-        tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_S-SX_North_bounding_final.shp'))
+            tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_S-SX_North_centerline_final.shp'))
+        else:    
+            tec99_north_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_bounding_final.shp'))
+            tec99_south_bound = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_bounding_final.shp')) 
+            tec99_north_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_North_centerline_final.shp'))
+            tec99_south_centerline = gpd.read_file(os.path.join(gis_d, 'shp', 'pathlines', 'Technetium_Source_South_centerline_final.shp'))
 
         # load continuous source score points
         continuous_source_score_gdf = gpd.read_file(os.path.join(gis_d, 'shp', 'scores', 'tec99_continuous_source_scores.shp'))
@@ -2604,21 +3159,36 @@ def generate_continuous_source_score_map_tec99(flag, gis_d, fig_d, ptrk_calc_d, 
         # start plotting shapefiles
         fig, ax = plt.subplots(figsize=(10,10), dpi=400)
 
-        cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
-        te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
-        wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
-        wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
-        model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
-        data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
-        hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
-        candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
-        candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
-        candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
-        candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
-        tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tech99 north bounding polygon')
-        tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tech99 north centerline')
-        tec99_south_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.25, label='tec99 south bounding polygon')
-        tec99_south_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_S_wma_sxsy_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA S & WMA SX-SY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tec99 north bounding polygon')
+            tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 north centerline')
+        else:
+            cr_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='brown', alpha=1, label='chromium source zones')
+            te_source_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='violet', alpha=1, label='tec-99 source zones')
+            wids_poly_gpf.plot(ax=ax, edgecolor='black', linewidth=0.35, zorder=1, facecolor='lightgrey', alpha=0.3, label='WIDS')
+            wma_T_wma_txty_gpf.plot(ax=ax, edgecolor='black', linewidth=0.25, zorder=1, facecolor='yellow', alpha=0.2, label='WMA T & WMA TX-TY')
+            model_grid_gdf.plot(ax=ax, edgecolor='black', linewidth=0.20, zorder=0, facecolor='white', alpha=0.2, label='flow model grid')
+            data_gap_locs.plot(ax=ax, edgecolor='black', linewidth=0.7, zorder=1, facecolor='gainsboro', alpha=0.2, label='data gap locations'),
+            hwis_data_gdf_red.plot(ax=ax, edgecolor='black', markersize=4, linewidth=0.1, zorder=1, facecolor='black', alpha=1.0, label='hwis pull locs')
+            candidate_wells_ew_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='black', marker='^', markersize=20, label='candidate extraction wells UU/MU')
+            candidate_wells_mw_uumu_gdf.plot(ax=ax, facecolor='None', edgecolor='green', marker='o', markersize=15, label='candidate monitoring wells UU/MU')
+            candidate_wells_ew_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='grey', marker='^', markersize=20, label='candidate extraction wells LU/CR')
+            candidate_wells_mw_lucr_gdf.plot(ax=ax, facecolor='None', edgecolor='lightgreen', marker='o', markersize=15, label='candidate monitoring wells LU/CR')
+            tec99_north_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.5, label='tec99 north bounding polygon')
+            tec99_north_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 north centerline')
+            tec99_south_bound.plot(ax=ax, facecolor='fuchsia', edgecolor='black', alpha=0.25, label='tec99 south bounding polygon')
+            tec99_south_centerline.plot(ax=ax, color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
 
         colorflood_legend_elements = []
         # plot final continuous source score shapefile here
@@ -2628,47 +3198,80 @@ def generate_continuous_source_score_map_tec99(flag, gis_d, fig_d, ptrk_calc_d, 
             # Add corresponding legend patch
             colorflood_legend_elements.append(Patch(facecolor=color, edgecolor='black', alpha=0.75, label=f'{low}-{high}'))
 
-        # manually define legend items
-        legend_elements = [
-            Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
-            Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
-            Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
-            Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
-            Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
-            Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
-            Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
-            Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
-            Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tech99 north bounding polygon'),
-            Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tech99 north centerline'),
-            Patch(facecolor='fuchsia', edgecolor='black', alpha=0.2, label='tec99 south bounding polygon'),
-            Line2D([0], [0], color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
-        ]
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tec99 north bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tec99 north centerline')
+            ]
+
+        else:
+            # manually define legend items
+            legend_elements = [
+                Patch(facecolor='brown', edgecolor='black', alpha=1, label='Chromium source zones'),
+                Patch(facecolor='violet', edgecolor='black', alpha=1, label='Tec-99 source zones'),
+                Patch(facecolor='lightgrey', edgecolor='black', alpha=0.3, label='WIDS'),
+                Patch(facecolor='yellow', edgecolor='black', alpha=0.2, label='WMA T & WMA TX-TY'),
+                Patch(facecolor='white', edgecolor='black', alpha=0.2, label='flow model grid'),
+                Line2D([0], [0], marker='o', color='w', markerfacecolor='gainsboro', markeredgecolor='black', linewidth=0.7, alpha=0.2, label='data gap locations'),
+                Line2D([0], [0], marker='o', markerfacecolor='black', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'hwis pull locs'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='black', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells UU/MU'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='green', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells UU/MU'),
+                Line2D([0], [0], marker='^', markerfacecolor='None', markeredgecolor='grey', linewidth=0.1, alpha=1.0, label = 'candidate extraction wells LU/CR'),
+                Line2D([0], [0], marker='o', markerfacecolor='None', markeredgecolor='lightgreen', linewidth=0.1, alpha=1.0, label = 'candidate monitoring wells LU/CR'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.4, label='tech99 north bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--',  alpha=1, label='tech99 north centerline'),
+                Patch(facecolor='fuchsia', edgecolor='black', alpha=0.2, label='tec99 south bounding polygon'),
+                Line2D([0], [0], color='red', linewidth=1.5, linestyle='--', alpha=1, label='tec99 south centerline')
+            ]
 
         combined_legend_elements = legend_elements + colorflood_legend_elements
 
         ax.legend(handles=combined_legend_elements, loc='upper right')
 
-        x_axis_offset = 600
-        y_axis_offset = 400
-        plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
-        plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([133300+y_axis_offset, 135250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+        else:
+            x_axis_offset = 600
+            y_axis_offset = 400
+            plt.ylim([135300+y_axis_offset, 137250+y_axis_offset])
+            plt.xlim([566000+x_axis_offset, 567950+x_axis_offset])
+
         plt.title('Tec99 Continuous Source Score Map from mp3du tracking')
         plt.ylabel('Northing (meters)')
         plt.xlabel('Easting (meters)')
         plt.tight_layout()
 
-        if part_type == 'ring':
-            plt.savefig(os.path.join(fig_d, 'tec99_mp3du_continuous_source_score_map_rings.png'), dpi=400)
+        if ptrk_calc_d == os.path.join(cwd, 'calcs', 'ptrack-ssx'):
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'tec99_mp3du_continuous_source_score_map_rings_ssxsy.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'tec99_mp3du_continuous_source_score_map_centroids_ssxsy.png'), dpi=400)
         else:
-            plt.savefig(os.path.join(fig_d, 'tec99_mp3du_continuous_source_score_map_centroids.png'), dpi=400)
+            if part_type == 'ring':
+                plt.savefig(os.path.join(fig_d, 'tec99_mp3du_continuous_source_score_map_rings.png'), dpi=400)
+            else:
+                plt.savefig(os.path.join(fig_d, 'tec99_mp3du_continuous_source_score_map_centroids.png'), dpi=400)
+
     else:
         print('generate_continuous_source_score_map function selected NOT to run for tec99...')
 
 # calculate scores for continuous source areas chromium only
-def calculate_continuous_source_score_chromium(flag, gis_d, fig_d, ptrk_calc_d, source_area_list):
+def calculate_continuous_source_score_chromium(flag, gis_d, source_area_list):
     if flag:
         print('calculating continuous source scores for chromium combined...')
         compiled_scores = []
@@ -2731,7 +3334,7 @@ def calculate_continuous_source_score_chromium(flag, gis_d, fig_d, ptrk_calc_d, 
         print('calculate_continuous_source_score function selected NOT to run for chromium combined...')
 
 # calculate scores for continuous source areas tec99 only
-def calculate_continuous_source_score_tec99(flag, gis_d, fig_d, ptrk_calc_d, source_area_list):
+def calculate_continuous_source_score_tec99(flag, gis_d, source_area_list):
     if flag:
         print('calculating continuous source scores for tec99 combined...')
         compiled_scores = []
@@ -2794,7 +3397,7 @@ def calculate_continuous_source_score_tec99(flag, gis_d, fig_d, ptrk_calc_d, sou
         print('calculate_continuous_source_score function selected NOT to run for tec99 combined...')
 
 # calculate scores for continuous source areas ctet only
-def calculate_continuous_source_score_ctet(flag, gis_d, fig_d, ptrk_calc_d):
+def calculate_continuous_source_score_ctet(flag, gis_d):
     if flag:
         print('calculating continuous source scores for ctet combined...')
 
@@ -2815,7 +3418,7 @@ def calculate_continuous_source_score_ctet(flag, gis_d, fig_d, ptrk_calc_d):
         print('calculate_continuous_source_score function selected NOT to run for ctet...')
 
 # combine scores only for Smw, Sew, Scs
-def combine_all_scores_only(flag, gis_d, fig_d, ptrk_calc_d):
+def combine_all_scores_only(flag, gis_d):
     if flag:
         print('combine_all_scores_only function selected to run...')
 
@@ -2880,7 +3483,7 @@ def combine_all_scores_only(flag, gis_d, fig_d, ptrk_calc_d):
         print('combine_all_scores_only function NOT selected to run...')
 
 # combine scores with details for Smw, Sew, Scs
-def combine_all_scores_detailed(flag, gis_d, fig_d, ptrk_calc_d):
+def combine_all_scores_detailed(flag, gis_d):
     if flag:
         print('combine_all_scores_detailed function selected to run...')
 
@@ -3009,12 +3612,23 @@ def main():
         print('starting particle tracking calculations...')
         for constituent in constituent_list:
             create_ptrk_folder(flag_create_ptrk_folder, constituent, flow_source_d, ptrk_calc_d, exe_d, exe_list)
+        
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            create_ptrk_folder(flag_create_ptrk_folder, constituent, flow_source_d, ptrk_ssx_calc_d, exe_d, exe_list)
 
         copy_transport_props(flag_copy_transport_props, transport_source_d, ptrk_calc_d)
-
+        
+        # ssx tank farms continuing source
+        copy_transport_props(flag_copy_transport_props, transport_source_d, ptrk_ssx_calc_d)
+        
         mf_inp_fnm = 'P2Rv8.3_start2015_sp2024.nam'
         for constituent in constituent_list:
             run_modflow(flag_run_modflow, constituent, ptrk_calc_d, mf_executable, mf_inp_fnm)
+
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            run_modflow(flag_run_modflow, constituent, ptrk_ssx_calc_d, mf_executable, mf_inp_fnm)
 
         xoff = 557800.00
         yoff = 142800.00 - 26600.00 # 142800 is the top of the model grid in the y direction
@@ -3029,9 +3643,20 @@ def main():
                                 xoff, yoff, rot, flow_fnm, dis_type, 
                                 gsf_nm, gsf_json_nm
                                 )
-
+        
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            write_gsf_json_input(flag_write_gsf_json_input, constituent, ptrk_ssx_calc_d, 
+                                xoff, yoff, rot, flow_fnm, dis_type, 
+                                gsf_nm, gsf_json_nm
+                                )
+            
         for constituent in constituent_list:
             run_gsfwriter(flag_run_gsfwriter, constituent, ptrk_calc_d, gsf_executable, gsf_json_nm)
+
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            run_gsfwriter(flag_run_gsfwriter, constituent, ptrk_ssx_calc_d, gsf_executable, gsf_json_nm)
 
         binary_print_ID = 88 # check to make sure that you are not overwriting any other packages with this binary ID
         package_name = 'mp3du.p3d'
@@ -3041,15 +3666,32 @@ def main():
                                                    constituent, ptrk_calc_d, mf_inp_fnm, 
                                                    binary_print_ID, package_name, package_type
                                                    )
+        
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            modify_nam_file_with_new_package_mp3du(flag_modify_nam_file_with_new_package_mp3du, 
+                                                   constituent, ptrk_ssx_calc_d, mf_inp_fnm, 
+                                                   binary_print_ID, package_name, package_type
+                                                   )
 
         p3d_fnm = package_name
         for constituent in constituent_list:
             write_p3d_mp3du(flag_write_p3d_mp3du, constituent, ptrk_calc_d, p3d_fnm)
 
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            write_p3d_mp3du(flag_write_p3d_mp3du, constituent, ptrk_ssx_calc_d, p3d_fnm)
+
         pstrt_fnm = 'particle_starting_locations'
         for constituent in constituent_list:
             generate_part_start_locs(flag_generate_part_start_locs, constituent,
                                      ptrk_calc_d, pstrt_fnm, gis_d
+                                     )
+            
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            generate_part_start_locs(flag_generate_part_start_locs, constituent,
+                                     ptrk_ssx_calc_d, pstrt_fnm, gis_d
                                      )
 
         mp3du_json_nm = mf_inp_fnm.replace('.nam', '')
@@ -3061,21 +3703,49 @@ def main():
                                    mp3du_json_nm, pstrt_fnm, pthlin_nm,
                                    part_type
                                    )
-        
+            
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            pthlin_nm = f'{constituent}.shp'
+            write_mp3du_json_input(flag_mp3du_json_input, constituent, 
+                                   ptrk_ssx_calc_d, gsf_nm, flow_fnm,
+                                   mp3du_json_nm, pstrt_fnm, pthlin_nm,
+                                   part_type
+                                   )
+
         input_file = mp3du_json_nm+'.json'
         for constituent in constituent_list:
             run_mp3du(flag_run_mp3du, constituent, ptrk_calc_d, mp3du_executable, input_file)
-        
+
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            run_mp3du(flag_run_mp3du, constituent, ptrk_ssx_calc_d, mp3du_executable, input_file)
+
         for constituent in constituent_list:
             p3doutput_json_nm = f'{constituent}_path_p3doutput'
             write_p3doutput_json_input_path(flag_write_p3doutput_json_input_path, constituent,
                                        ptrk_calc_d, p3doutput_json_nm
                                        )
 
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            p3doutput_json_nm = f'{constituent}_path_p3doutput'
+            write_p3doutput_json_input_path(flag_write_p3doutput_json_input_path, constituent,
+                                       ptrk_ssx_calc_d, p3doutput_json_nm
+                                       )
+            
         for constituent in constituent_list:
             p3doutput_json_nm = f'{constituent}_path_p3doutput'+'.json'
             run_writep3doutput(flag_run_writep3doutput, constituent, 
                                ptrk_calc_d, writep3doutput_executable,
+                               p3doutput_json_nm
+                               )
+
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            p3doutput_json_nm = f'{constituent}_path_p3doutput'+'.json'
+            run_writep3doutput(flag_run_writep3doutput, constituent, 
+                               ptrk_ssx_calc_d, writep3doutput_executable,
                                p3doutput_json_nm
                                )
             
@@ -3085,22 +3755,54 @@ def main():
                                        ptrk_calc_d, p3doutput_json_nm
                                        )
 
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            p3doutput_json_nm = f'{constituent}_endpts_p3doutput'
+            write_p3doutput_json_input_endpts(flag_write_p3doutput_json_input_endpts, constituent,
+                                       ptrk_ssx_calc_d, p3doutput_json_nm
+                                       )
+
         for constituent in constituent_list:
             p3doutput_json_nm = f'{constituent}_endpts_p3doutput'+'.json'
             run_writep3doutput(flag_run_writep3doutput, constituent, 
                                ptrk_calc_d, writep3doutput_executable,
                                p3doutput_json_nm
                                )
+            
+        # ssx tank farms continuing source
+        for constituent in constituent_list:
+            p3doutput_json_nm = f'{constituent}_endpts_p3doutput'+'.json'
+            run_writep3doutput(flag_run_writep3doutput, constituent, 
+                               ptrk_ssx_calc_d, writep3doutput_executable,
+                               p3doutput_json_nm
+                               )
 
         # plot results of particle tracking
         generate_pathlines_map(flag_generate_pathlines_map, gis_d, fig_d, ptrk_calc_d, part_type)
+        # ssx tank farms continuing source
+        generate_pathlines_map(flag_generate_pathlines_map, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
+
         generate_endpoints_map(flag_generate_endpoints_map, gis_d, fig_d, ptrk_calc_d, part_type)
-        generate_pathlines_endpoints_map(flag_generate_pathlines_endpoints_map, gis_d, fig_d, ptrk_calc_d, part_type)
-        calc_relative_path_count(flag_calc_relative_path_count, gis_d, ptrk_calc_d)
-        generate_relcount_pathlines_map(flag_relcount_pathlines_map, gis_d, fig_d, ptrk_calc_d, part_type)
+        # ssx tank farms continuing source
+        generate_endpoints_map(flag_generate_endpoints_map, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
         
+        generate_pathlines_endpoints_map(flag_generate_pathlines_endpoints_map, gis_d, fig_d, ptrk_calc_d, part_type)
+        # ssx tank farms continuing source
+        generate_pathlines_endpoints_map(flag_generate_pathlines_endpoints_map, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
+
+        calc_relative_path_count(flag_calc_relative_path_count, gis_d, ptrk_calc_d)
+        # ssx tank farms continuing source
+        calc_relative_path_count(flag_calc_relative_path_count, gis_d, ptrk_ssx_calc_d)
+
+        generate_relcount_pathlines_map(flag_relcount_pathlines_map, gis_d, fig_d, ptrk_calc_d, part_type)
+        # ssx tank farms continuing source
+        generate_relcount_pathlines_map(flag_relcount_pathlines_map, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
+
         # generate bounding polygons for each continuing source
         parse_source_zones(flag_parse_source_zones, gis_d, fig_d, ptrk_calc_d, part_type)
+
+        # ssx tank farms continuing source
+        parse_source_zones(flag_parse_source_zones, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
         
         # run these functions if bounding and centerline shapefiles do not exists
         source_area_list = ['Chromium_Source_North', 'Chromium_Source_South', 'Technetium_Source_North', 'Technetium_Source_South']
@@ -3124,29 +3826,63 @@ def main():
 
         # plot bounding polygons with centerlines for all continuing source areas combined
         generate_bounding_centerline_map_all(flag_generate_bounding_centerline_map_all, gis_d, fig_d, ptrk_calc_d, part_type)
+        
+        # ssx tank farms continuing source
+        # run these functions if bounding and centerline shapefiles do not exists
+        source_area_list = ['Chromium_Source_S-SX_North', 'Chromium_Source_S-SX_South', 'Technetium_Source_S-SX_North']
+        for source_area in source_area_list:
+            if flag_generate_bounding_and_centerline:
+                
+                print(f'creating final bounding polygon from scratch for {source_area}...')
+                generate_bounding_polygon(flag_generate_bounding_polygon, gis_d, fig_d, ptrk_ssx_calc_d, part_type, source_area)
+                
+                print(f'creating final centerline from scratch for {source_area}...')
+                generate_centerline(flag_generate_centerline, gis_d, fig_d, ptrk_ssx_calc_d, part_type, source_area)
+            
+            else:
+                print(f'NOT creating final bounding polygon from scratch for {source_area}...')
+                print(f'NOT creating final centerline from scratch for {source_area}...')
+            
+        # now discretize each center line into points & determine which potential well cells are in bounding areas
+        for source_area in source_area_list:
+            centerline_to_points(flag_centerline_to_points, gis_d, fig_d, ptrk_ssx_calc_d, source_area)
+            potential_wells_in_bounding(flag_potential_wells_in_bounding, gis_d, fig_d,ptrk_ssx_calc_d, source_area)
+
+        # plot bounding polygons with centerlines for all continuing source areas combined
+        generate_bounding_centerline_map_all(flag_generate_bounding_centerline_map_all, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
+
+        # define all source area sites, including WMA S and WMA SX & SY
+        source_area_list = ['Chromium_Source_North', 'Chromium_Source_South', 'Technetium_Source_North', 'Technetium_Source_South', 'Chromium_Source_S-SX_North', 'Chromium_Source_S-SX_South', 'Technetium_Source_S-SX_North']
         # calculate continuous source scores for all continuing source areas combined
-        calculate_continuous_source_score_all(flag_calculate_continuous_source_score_all, gis_d, fig_d, ptrk_calc_d, source_area_list)
+        calculate_continuous_source_score_all(flag_calculate_continuous_source_score_all, gis_d, source_area_list)
+        
         # generate map of continuous source scores for all continuing source areas combined
         generate_continuous_source_score_map_all(flag_generate_continuous_source_score_map_all, gis_d, fig_d, ptrk_calc_d, part_type)
+        # ssx tank farms continuing source
+        generate_continuous_source_score_map_all(flag_generate_continuous_source_score_map_all, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
 
         # calculate scores for chromium only
-        source_area_list_cr = ['Chromium_Source_North', 'Chromium_Source_South']
-        calculate_continuous_source_score_chromium(flag_calculate_continuous_source_score_chromium, gis_d, fig_d, ptrk_calc_d, source_area_list_cr)
+        source_area_list_cr = ['Chromium_Source_North', 'Chromium_Source_South', 'Chromium_Source_S-SX_North', 'Chromium_Source_S-SX_South']
+        calculate_continuous_source_score_chromium(flag_calculate_continuous_source_score_chromium, gis_d, source_area_list_cr)
         # generate map of continuous source scores for chromium
         generate_continuous_source_score_map_chromium(flag_generate_continuous_source_score_map_chromium, gis_d, fig_d, ptrk_calc_d, part_type)
+        # ssx tank farms continuing source
+        generate_continuous_source_score_map_chromium(flag_generate_continuous_source_score_map_chromium, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
         
         # calculate scores for tec99 only
-        source_area_list_tec99 = ['Technetium_Source_North', 'Technetium_Source_South']
-        calculate_continuous_source_score_tec99(flag_calculate_continuous_source_score_tec99, gis_d, fig_d, ptrk_calc_d, source_area_list_tec99)
+        source_area_list_tec99 = ['Technetium_Source_North', 'Technetium_Source_South', 'Technetium_Source_S-SX_North']
+        calculate_continuous_source_score_tec99(flag_calculate_continuous_source_score_tec99, gis_d, source_area_list_tec99)
         # generate map of continuous source scores for tec99
         generate_continuous_source_score_map_tec99(flag_generate_continuous_source_score_map_tec99, gis_d, fig_d, ptrk_calc_d, part_type)
-        
+        # ssx tank farms continuing source
+        generate_continuous_source_score_map_tec99(flag_generate_continuous_source_score_map_tec99, gis_d, fig_d, ptrk_ssx_calc_d, part_type)
+
         # calculate scores for ctet only (all zeros)
-        calculate_continuous_source_score_ctet(flag_calculate_continuous_source_score_ctet, gis_d, fig_d, ptrk_calc_d)
+        calculate_continuous_source_score_ctet(flag_calculate_continuous_source_score_ctet, gis_d)
 
         # combine calculated scores into csvs and shapefiles for Smw, Sew, Scs
-        combine_all_scores_only(flag_combine_all_scores_only, gis_d, fig_d, ptrk_calc_d)             
-        combine_all_scores_detailed(flag_combine_all_scores_detailed, gis_d, fig_d, ptrk_calc_d)
+        combine_all_scores_only(flag_combine_all_scores_only, gis_d)             
+        combine_all_scores_detailed(flag_combine_all_scores_detailed, gis_d)
         
     else:
         print('ecf calculations workflows NOT selected to run, \n check booleans...')
